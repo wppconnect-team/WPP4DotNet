@@ -1,0 +1,70 @@
+D:\Projetos\WPP4DotNet\WPP4DotNet\WPP4DotNet.Exemple\bin\Debug\net5.0-windows\WPP4DotNet.Exemple.exe
+D:\Projetos\WPP4DotNet\WPP4DotNet\WPP4DotNet.Exemple\bin\Debug\net5.0-windows\WPP4DotNet.Exemple.deps.json
+D:\Projetos\WPP4DotNet\WPP4DotNet\WPP4DotNet.Exemple\bin\Debug\net5.0-windows\WPP4DotNet.Exemple.runtimeconfig.json
+D:\Projetos\WPP4DotNet\WPP4DotNet\WPP4DotNet.Exemple\bin\Debug\net5.0-windows\WPP4DotNet.Exemple.runtimeconfig.dev.json
+D:\Projetos\WPP4DotNet\WPP4DotNet\WPP4DotNet.Exemple\bin\Debug\net5.0-windows\WPP4DotNet.Exemple.dll
+D:\Projetos\WPP4DotNet\WPP4DotNet\WPP4DotNet.Exemple\bin\Debug\net5.0-windows\WPP4DotNet.Exemple.pdb
+D:\Projetos\WPP4DotNet\WPP4DotNet\WPP4DotNet.Exemple\bin\Debug\net5.0-windows\AngleSharp.dll
+D:\Projetos\WPP4DotNet\WPP4DotNet\WPP4DotNet.Exemple\bin\Debug\net5.0-windows\Microsoft.Win32.SystemEvents.dll
+D:\Projetos\WPP4DotNet\WPP4DotNet\WPP4DotNet.Exemple\bin\Debug\net5.0-windows\Newtonsoft.Json.dll
+D:\Projetos\WPP4DotNet\WPP4DotNet\WPP4DotNet.Exemple\bin\Debug\net5.0-windows\Polly.dll
+D:\Projetos\WPP4DotNet\WPP4DotNet\WPP4DotNet.Exemple\bin\Debug\net5.0-windows\RestSharp.dll
+D:\Projetos\WPP4DotNet\WPP4DotNet\WPP4DotNet.Exemple\bin\Debug\net5.0-windows\WebDriver.Support.dll
+D:\Projetos\WPP4DotNet\WPP4DotNet\WPP4DotNet.Exemple\bin\Debug\net5.0-windows\WebDriver.dll
+D:\Projetos\WPP4DotNet\WPP4DotNet\WPP4DotNet.Exemple\bin\Debug\net5.0-windows\ICSharpCode.SharpZipLib.dll
+D:\Projetos\WPP4DotNet\WPP4DotNet\WPP4DotNet.Exemple\bin\Debug\net5.0-windows\System.Drawing.Common.dll
+D:\Projetos\WPP4DotNet\WPP4DotNet\WPP4DotNet.Exemple\bin\Debug\net5.0-windows\WebDriverManager.dll
+D:\Projetos\WPP4DotNet\WPP4DotNet\WPP4DotNet.Exemple\bin\Debug\net5.0-windows\runtimes\win\lib\netcoreapp3.1\Microsoft.Win32.SystemEvents.dll
+D:\Projetos\WPP4DotNet\WPP4DotNet\WPP4DotNet.Exemple\bin\Debug\net5.0-windows\runtimes\unix\lib\netcoreapp3.1\System.Drawing.Common.dll
+D:\Projetos\WPP4DotNet\WPP4DotNet\WPP4DotNet.Exemple\bin\Debug\net5.0-windows\runtimes\win\lib\netcoreapp3.1\System.Drawing.Common.dll
+D:\Projetos\WPP4DotNet\WPP4DotNet\WPP4DotNet.Exemple\bin\Debug\net5.0-windows\WPP4DotNet.dll
+D:\Projetos\WPP4DotNet\WPP4DotNet\WPP4DotNet.Exemple\bin\Debug\net5.0-windows\WPP4DotNet.pdb
+D:\Projetos\WPP4DotNet\WPP4DotNet\WPP4DotNet.Exemple\obj\Debug\net5.0-windows\WPP4DotNet.Exemple.csproj.AssemblyReference.cache
+D:\Projetos\WPP4DotNet\WPP4DotNet\WPP4DotNet.Exemple\obj\Debug\net5.0-windows\WPP4DotNet.Exemple.csproj.GenerateResource.cache
+D:\Projetos\WPP4DotNet\WPP4DotNet\WPP4DotNet.Exemple\obj\Debug\net5.0-windows\WPP4DotNet.Exemple.GeneratedMSBuildEditorConfig.editorconfig
+D:\Projetos\WPP4DotNet\WPP4DotNet\WPP4DotNet.Exemple\obj\Debug\net5.0-windows\WPP4DotNet.Exemple.AssemblyInfoInputs.cache
+D:\Projetos\WPP4DotNet\WPP4DotNet\WPP4DotNet.Exemple\obj\Debug\net5.0-windows\WPP4DotNet.Exemple.AssemblyInfo.cs
+D:\Projetos\WPP4DotNet\WPP4DotNet\WPP4DotNet.Exemple\obj\Debug\net5.0-windows\WPP4DotNet.Exemple.csproj.CoreCompileInputs.cache
+D:\Projetos\WPP4DotNet\WPP4DotNet\WPP4DotNet.Exemple\obj\Debug\net5.0-windows\WPP4DotNet.Exemple.csproj.CopyComplete
+D:\Projetos\WPP4DotNet\WPP4DotNet\WPP4DotNet.Exemple\obj\Debug\net5.0-windows\WPP4DotNet.Exemple.dll
+D:\Projetos\WPP4DotNet\WPP4DotNet\WPP4DotNet.Exemple\obj\Debug\net5.0-windows\refint\WPP4DotNet.Exemple.dll
+D:\Projetos\WPP4DotNet\WPP4DotNet\WPP4DotNet.Exemple\obj\Debug\net5.0-windows\WPP4DotNet.Exemple.pdb
+D:\Projetos\WPP4DotNet\WPP4DotNet\WPP4DotNet.Exemple\obj\Debug\net5.0-windows\WPP4DotNet.Exemple.genruntimeconfig.cache
+D:\Projetos\WPP4DotNet\WPP4DotNet\WPP4DotNet.Exemple\obj\Debug\net5.0-windows\ref\WPP4DotNet.Exemple.dll
+D:\Projetos\WPP4DotNet\WPP4DotNet\WPP4DotNet.Exemple\obj\Debug\net5.0-windows\WPP4DotNet.Exemple.FrmDefault.resources
+D:\Projetos\WPP4DotNet\WPP4DotNet\WPP4DotNet.Exemple\bin\Debug\net5.0-windows\zxing.dll
+C:\Users\Eduardo Fiorini\OneDrive\Documentos\GitHub\WPP4DotNet\WPP4DotNet.Exemple\bin\Debug\net5.0-windows\WPP4DotNet.Exemple.exe
+C:\Users\Eduardo Fiorini\OneDrive\Documentos\GitHub\WPP4DotNet\WPP4DotNet.Exemple\bin\Debug\net5.0-windows\WPP4DotNet.Exemple.deps.json
+C:\Users\Eduardo Fiorini\OneDrive\Documentos\GitHub\WPP4DotNet\WPP4DotNet.Exemple\bin\Debug\net5.0-windows\WPP4DotNet.Exemple.runtimeconfig.json
+C:\Users\Eduardo Fiorini\OneDrive\Documentos\GitHub\WPP4DotNet\WPP4DotNet.Exemple\bin\Debug\net5.0-windows\WPP4DotNet.Exemple.runtimeconfig.dev.json
+C:\Users\Eduardo Fiorini\OneDrive\Documentos\GitHub\WPP4DotNet\WPP4DotNet.Exemple\bin\Debug\net5.0-windows\WPP4DotNet.Exemple.dll
+C:\Users\Eduardo Fiorini\OneDrive\Documentos\GitHub\WPP4DotNet\WPP4DotNet.Exemple\bin\Debug\net5.0-windows\ref\WPP4DotNet.Exemple.dll
+C:\Users\Eduardo Fiorini\OneDrive\Documentos\GitHub\WPP4DotNet\WPP4DotNet.Exemple\bin\Debug\net5.0-windows\WPP4DotNet.Exemple.pdb
+C:\Users\Eduardo Fiorini\OneDrive\Documentos\GitHub\WPP4DotNet\WPP4DotNet.Exemple\bin\Debug\net5.0-windows\AngleSharp.dll
+C:\Users\Eduardo Fiorini\OneDrive\Documentos\GitHub\WPP4DotNet\WPP4DotNet.Exemple\bin\Debug\net5.0-windows\Microsoft.Win32.SystemEvents.dll
+C:\Users\Eduardo Fiorini\OneDrive\Documentos\GitHub\WPP4DotNet\WPP4DotNet.Exemple\bin\Debug\net5.0-windows\Newtonsoft.Json.dll
+C:\Users\Eduardo Fiorini\OneDrive\Documentos\GitHub\WPP4DotNet\WPP4DotNet.Exemple\bin\Debug\net5.0-windows\Polly.dll
+C:\Users\Eduardo Fiorini\OneDrive\Documentos\GitHub\WPP4DotNet\WPP4DotNet.Exemple\bin\Debug\net5.0-windows\RestSharp.dll
+C:\Users\Eduardo Fiorini\OneDrive\Documentos\GitHub\WPP4DotNet\WPP4DotNet.Exemple\bin\Debug\net5.0-windows\WebDriver.Support.dll
+C:\Users\Eduardo Fiorini\OneDrive\Documentos\GitHub\WPP4DotNet\WPP4DotNet.Exemple\bin\Debug\net5.0-windows\WebDriver.dll
+C:\Users\Eduardo Fiorini\OneDrive\Documentos\GitHub\WPP4DotNet\WPP4DotNet.Exemple\bin\Debug\net5.0-windows\ICSharpCode.SharpZipLib.dll
+C:\Users\Eduardo Fiorini\OneDrive\Documentos\GitHub\WPP4DotNet\WPP4DotNet.Exemple\bin\Debug\net5.0-windows\System.Drawing.Common.dll
+C:\Users\Eduardo Fiorini\OneDrive\Documentos\GitHub\WPP4DotNet\WPP4DotNet.Exemple\bin\Debug\net5.0-windows\WebDriverManager.dll
+C:\Users\Eduardo Fiorini\OneDrive\Documentos\GitHub\WPP4DotNet\WPP4DotNet.Exemple\bin\Debug\net5.0-windows\zxing.dll
+C:\Users\Eduardo Fiorini\OneDrive\Documentos\GitHub\WPP4DotNet\WPP4DotNet.Exemple\bin\Debug\net5.0-windows\runtimes\win\lib\netcoreapp3.1\Microsoft.Win32.SystemEvents.dll
+C:\Users\Eduardo Fiorini\OneDrive\Documentos\GitHub\WPP4DotNet\WPP4DotNet.Exemple\bin\Debug\net5.0-windows\runtimes\unix\lib\netcoreapp3.1\System.Drawing.Common.dll
+C:\Users\Eduardo Fiorini\OneDrive\Documentos\GitHub\WPP4DotNet\WPP4DotNet.Exemple\bin\Debug\net5.0-windows\runtimes\win\lib\netcoreapp3.1\System.Drawing.Common.dll
+C:\Users\Eduardo Fiorini\OneDrive\Documentos\GitHub\WPP4DotNet\WPP4DotNet.Exemple\bin\Debug\net5.0-windows\WPP4DotNet.dll
+C:\Users\Eduardo Fiorini\OneDrive\Documentos\GitHub\WPP4DotNet\WPP4DotNet.Exemple\bin\Debug\net5.0-windows\WPP4DotNet.pdb
+C:\Users\Eduardo Fiorini\OneDrive\Documentos\GitHub\WPP4DotNet\WPP4DotNet.Exemple\obj\Debug\net5.0-windows\WPP4DotNet.Exemple.csproj.AssemblyReference.cache
+C:\Users\Eduardo Fiorini\OneDrive\Documentos\GitHub\WPP4DotNet\WPP4DotNet.Exemple\obj\Debug\net5.0-windows\WPP4DotNet.Exemple.FrmDefault.resources
+C:\Users\Eduardo Fiorini\OneDrive\Documentos\GitHub\WPP4DotNet\WPP4DotNet.Exemple\obj\Debug\net5.0-windows\WPP4DotNet.Exemple.csproj.GenerateResource.cache
+C:\Users\Eduardo Fiorini\OneDrive\Documentos\GitHub\WPP4DotNet\WPP4DotNet.Exemple\obj\Debug\net5.0-windows\WPP4DotNet.Exemple.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Eduardo Fiorini\OneDrive\Documentos\GitHub\WPP4DotNet\WPP4DotNet.Exemple\obj\Debug\net5.0-windows\WPP4DotNet.Exemple.AssemblyInfoInputs.cache
+C:\Users\Eduardo Fiorini\OneDrive\Documentos\GitHub\WPP4DotNet\WPP4DotNet.Exemple\obj\Debug\net5.0-windows\WPP4DotNet.Exemple.AssemblyInfo.cs
+C:\Users\Eduardo Fiorini\OneDrive\Documentos\GitHub\WPP4DotNet\WPP4DotNet.Exemple\obj\Debug\net5.0-windows\WPP4DotNet.Exemple.csproj.CoreCompileInputs.cache
+C:\Users\Eduardo Fiorini\OneDrive\Documentos\GitHub\WPP4DotNet\WPP4DotNet.Exemple\obj\Debug\net5.0-windows\WPP4DotNet.Exemple.csproj.CopyComplete
+C:\Users\Eduardo Fiorini\OneDrive\Documentos\GitHub\WPP4DotNet\WPP4DotNet.Exemple\obj\Debug\net5.0-windows\WPP4DotNet.Exemple.dll
+C:\Users\Eduardo Fiorini\OneDrive\Documentos\GitHub\WPP4DotNet\WPP4DotNet.Exemple\obj\Debug\net5.0-windows\ref\WPP4DotNet.Exemple.dll
+C:\Users\Eduardo Fiorini\OneDrive\Documentos\GitHub\WPP4DotNet\WPP4DotNet.Exemple\obj\Debug\net5.0-windows\WPP4DotNet.Exemple.pdb
+C:\Users\Eduardo Fiorini\OneDrive\Documentos\GitHub\WPP4DotNet\WPP4DotNet.Exemple\obj\Debug\net5.0-windows\WPP4DotNet.Exemple.genruntimeconfig.cache

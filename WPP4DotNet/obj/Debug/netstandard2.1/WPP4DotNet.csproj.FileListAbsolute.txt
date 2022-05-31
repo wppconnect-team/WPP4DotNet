@@ -1,0 +1,20 @@
+D:\Projetos\WPP4DotNet\WPP4DotNet\WPP4DotNet\obj\Debug\netstandard2.1\WPP4DotNet.csproj.AssemblyReference.cache
+D:\Projetos\WPP4DotNet\WPP4DotNet\WPP4DotNet\obj\Debug\netstandard2.1\WPP4DotNet.GeneratedMSBuildEditorConfig.editorconfig
+D:\Projetos\WPP4DotNet\WPP4DotNet\WPP4DotNet\obj\Debug\netstandard2.1\WPP4DotNet.AssemblyInfoInputs.cache
+D:\Projetos\WPP4DotNet\WPP4DotNet\WPP4DotNet\obj\Debug\netstandard2.1\WPP4DotNet.AssemblyInfo.cs
+D:\Projetos\WPP4DotNet\WPP4DotNet\WPP4DotNet\obj\Debug\netstandard2.1\WPP4DotNet.csproj.CoreCompileInputs.cache
+D:\Projetos\WPP4DotNet\WPP4DotNet\WPP4DotNet\bin\Debug\netstandard2.1\WPP4DotNet.deps.json
+D:\Projetos\WPP4DotNet\WPP4DotNet\WPP4DotNet\bin\Debug\netstandard2.1\WPP4DotNet.dll
+D:\Projetos\WPP4DotNet\WPP4DotNet\WPP4DotNet\bin\Debug\netstandard2.1\WPP4DotNet.pdb
+D:\Projetos\WPP4DotNet\WPP4DotNet\WPP4DotNet\obj\Debug\netstandard2.1\WPP4DotNet.dll
+D:\Projetos\WPP4DotNet\WPP4DotNet\WPP4DotNet\obj\Debug\netstandard2.1\WPP4DotNet.pdb
+C:\Users\Eduardo Fiorini\OneDrive\Documentos\GitHub\WPP4DotNet\WPP4DotNet\bin\Debug\netstandard2.1\WPP4DotNet.deps.json
+C:\Users\Eduardo Fiorini\OneDrive\Documentos\GitHub\WPP4DotNet\WPP4DotNet\bin\Debug\netstandard2.1\WPP4DotNet.dll
+C:\Users\Eduardo Fiorini\OneDrive\Documentos\GitHub\WPP4DotNet\WPP4DotNet\bin\Debug\netstandard2.1\WPP4DotNet.pdb
+C:\Users\Eduardo Fiorini\OneDrive\Documentos\GitHub\WPP4DotNet\WPP4DotNet\obj\Debug\netstandard2.1\WPP4DotNet.csproj.AssemblyReference.cache
+C:\Users\Eduardo Fiorini\OneDrive\Documentos\GitHub\WPP4DotNet\WPP4DotNet\obj\Debug\netstandard2.1\WPP4DotNet.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Eduardo Fiorini\OneDrive\Documentos\GitHub\WPP4DotNet\WPP4DotNet\obj\Debug\netstandard2.1\WPP4DotNet.AssemblyInfoInputs.cache
+C:\Users\Eduardo Fiorini\OneDrive\Documentos\GitHub\WPP4DotNet\WPP4DotNet\obj\Debug\netstandard2.1\WPP4DotNet.AssemblyInfo.cs
+C:\Users\Eduardo Fiorini\OneDrive\Documentos\GitHub\WPP4DotNet\WPP4DotNet\obj\Debug\netstandard2.1\WPP4DotNet.csproj.CoreCompileInputs.cache
+C:\Users\Eduardo Fiorini\OneDrive\Documentos\GitHub\WPP4DotNet\WPP4DotNet\obj\Debug\netstandard2.1\WPP4DotNet.dll
+C:\Users\Eduardo Fiorini\OneDrive\Documentos\GitHub\WPP4DotNet\WPP4DotNet\obj\Debug\netstandard2.1\WPP4DotNet.pdb

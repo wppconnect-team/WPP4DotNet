@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32516.85
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WPP4DotNet", "WPP4DotNet\WPP4DotNet.csproj", "{49626772-2743-473F-83E4-6F5D75D605A7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WPP4DotNet.Exemple", "WPP4DotNet.Exemple\WPP4DotNet.Exemple.csproj", "{D951BE36-EED4-4543-9F37-A8EFB08A58BD}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{49626772-2743-473F-83E4-6F5D75D605A7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{49626772-2743-473F-83E4-6F5D75D605A7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{49626772-2743-473F-83E4-6F5D75D605A7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{49626772-2743-473F-83E4-6F5D75D605A7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D951BE36-EED4-4543-9F37-A8EFB08A58BD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D951BE36-EED4-4543-9F37-A8EFB08A58BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D951BE36-EED4-4543-9F37-A8EFB08A58BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D951BE36-EED4-4543-9F37-A8EFB08A58BD}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {4BDDFEA7-F906-47E8-A48B-102CF0213356}
+	EndGlobalSection
+EndGlobal
