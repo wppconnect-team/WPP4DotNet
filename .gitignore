@@ -49,5 +49,7 @@ $RECYCLE.BIN/
 #-------------------------
 # Builds Files
 #-------------------------
-Ci4/bin/
-Ci4/obj/
+WPP4DotNet/bin/
+WPP4DotNet/obj/
+WPP4DotNet.Exemple/bin/
+WPP4DotNet.Exemple/obj/
