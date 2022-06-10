@@ -7,8 +7,14 @@ namespace WPP4DotNet.WebDriver
 {
     public class FirefoxWebApp : IWpp
     {
+        /// <summary>
+        /// 
+        /// </summary>
         FirefoxOptions FirefoxOpt;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public FirefoxWebApp()
         {
             new DriverManager().SetUpDriver(new FirefoxConfig());
@@ -17,6 +23,11 @@ namespace WPP4DotNet.WebDriver
             //FirefoxOpt.AddArguments("--disable-infobars");
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="cache"></param>
+        /// <param name="hidden"></param>
         public override void StartSession(string cache = "", bool hidden = true)
         {
             CheckDriverStarted();
@@ -46,12 +57,20 @@ namespace WPP4DotNet.WebDriver
             base.StartSession(drive);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="path"></param>
         public void AddExtensao(string path)
         {
             CheckDriverStarted();
             FirefoxOpt.Profile.AddExtension(path);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="args"></param>
         public void AddArgumentoInicial(params string[] args)
         {
             CheckDriverStarted();

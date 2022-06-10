@@ -6,6 +6,12 @@ namespace WPP4DotNet.WebDriver
 {
     public class JavaScript
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="driver"></param>
+        /// <param name="script"></param>
+        /// <param name="args"></param>
         public void Execute(IWebDriver driver, string script, params object[] args)
         {
             try
@@ -18,6 +24,13 @@ namespace WPP4DotNet.WebDriver
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="driver"></param>
+        /// <param name="script"></param>
+        /// <param name="args"></param>
+        /// <returns></returns>
         public string ExecuteReturnString(IWebDriver driver, string script, params object[] args)
         {
             try
@@ -30,6 +43,14 @@ namespace WPP4DotNet.WebDriver
                 return "";
             }
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="driver"></param>
+        /// <param name="script"></param>
+        /// <param name="args"></param>
+        /// <returns></returns>
         public bool ExecuteReturnBool(IWebDriver driver, string script, params object[] args)
         {
             try
@@ -42,6 +63,14 @@ namespace WPP4DotNet.WebDriver
                 return false;
             }
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="driver"></param>
+        /// <param name="script"></param>
+        /// <param name="args"></param>
+        /// <returns></returns>
         public object ExecuteReturnObj(IWebDriver driver, string script, params object[] args)
         {
             try
@@ -54,6 +83,14 @@ namespace WPP4DotNet.WebDriver
                 return new object();
             }
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="driver"></param>
+        /// <param name="script"></param>
+        /// <param name="args"></param>
+        /// <returns></returns>
         public IReadOnlyCollection<object> ExecuteReturnListObj(IWebDriver driver, string script, params object[] args)
         {
             try
@@ -66,6 +103,15 @@ namespace WPP4DotNet.WebDriver
                 return null;
             }
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="driver"></param>
+        /// <param name="script"></param>
+        /// <param name="igual"></param>
+        /// <param name="args"></param>
+        /// <returns></returns>
         public bool ExecuteIgual(IWebDriver driver, string script, string igual, params object[] args)
         {
             try

@@ -6,8 +6,14 @@ namespace WPP4DotNet.WebDriver
 {
     public class ChromeWebApp : IWpp
     {
+        /// <summary>
+        /// 
+        /// </summary>
         ChromeOptions ChromeOpt;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public ChromeWebApp()
         {
             new DriverManager().SetUpDriver(new ChromeConfig());
@@ -22,6 +28,11 @@ namespace WPP4DotNet.WebDriver
             ChromeOpt.AddArguments("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36");
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="cache"></param>
+        /// <param name="hidden"></param>
         public override void StartSession(string cache = "", bool hidden = true)
         {
             CheckDriverStarted();
@@ -39,18 +50,30 @@ namespace WPP4DotNet.WebDriver
             base.StartSession(drive);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="path"></param>
         public void AddExtensao(string path)
         {
             CheckDriverStarted();
             ChromeOpt.AddExtension(path);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="base64"></param>
         public void AddExtensaoBase64(string base64)
         {
             CheckDriverStarted();
             ChromeOpt.AddEncodedExtension(base64);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="arg"></param>
         public void AddArgumentoInicial(params string[] arg)
         {
             CheckDriverStarted();

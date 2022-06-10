@@ -5,6 +5,9 @@ namespace WPP4DotNet.Models
 {
     internal class GitHubModels
     {
+        /// <summary>
+        /// package
+        /// </summary>
         internal class package
         {
             public string name { get; set; }
@@ -14,6 +17,10 @@ namespace WPP4DotNet.Models
             public DateTime created_at { get; set; }
             public DateTime published_at { get; set; }
         }
+
+        /// <summary>
+        /// Asset
+        /// </summary>
         internal class Asset
         {
             public string url { get; set; }
@@ -31,6 +38,9 @@ namespace WPP4DotNet.Models
             public string browser_download_url { get; set; }
         }
 
+        /// <summary>
+        /// Author
+        /// </summary>
         internal class Author
         {
             public string login { get; set; }
@@ -53,6 +63,9 @@ namespace WPP4DotNet.Models
             public bool site_admin { get; set; }
         }
 
+        /// <summary>
+        /// Release
+        /// </summary>
         internal class Release
         {
             public string url { get; set; }
@@ -75,6 +88,9 @@ namespace WPP4DotNet.Models
             public string body { get; set; }
         }
 
+        /// <summary>
+        /// Uploader
+        /// </summary>
         internal class Uploader
         {
             public string login { get; set; }

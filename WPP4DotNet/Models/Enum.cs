@@ -2,6 +2,9 @@
 {
     public static class Enum
     {
+        /// <summary>
+        /// Browser
+        /// </summary>
         public enum Browser
         {
             Chrome,
@@ -10,25 +13,41 @@
             Opera
         }
 
+        /// <summary>
+        /// MessageType
+        /// </summary>
         public enum MessageType
         {
-            Text,
-            Reply,
-            Sticker,
-            Mentioned,
-            Selection,
-            Button,
-            Contact,
-            Ptt,
-            Localization,
-            Link,
-            Audio,
-            Video,
-            Document,
-            Image,
-            Payment
+            chat,
+            text,
+            reply,
+            sticker,
+            mentioned,
+            selection,
+            button,
+            contact,
+            ptt,
+            localization,
+            link,
+            audio,
+            video,
+            document,
+            image,
+            payment
         }
 
+        /// <summary>
+        /// ChatType
+        /// </summary>
+        public enum ChatType
+        {
+            chat,
+            group
+        }
+
+        /// <summary>
+        /// Status
+        /// </summary>
         public enum Status
         {
             Connected,

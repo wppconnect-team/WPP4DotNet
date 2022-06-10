@@ -51,7 +51,7 @@ namespace WPP4DotNet.Exemple
                 }
             }
             _wpp.Received += Messenger;
-            Task.Run(() => _wpp.SearchMessage());
+            _ = Task.Run(() => _wpp.SearchMessage());
         }
 
         public void Connected(bool status)
@@ -61,16 +61,23 @@ namespace WPP4DotNet.Exemple
             panel2.Visible = false;
         }
 
+        public void AddList(ListViewItem l)
+        {
+            LstReceived.Items.Add(l);
+            LstReceived.Sorting = SortOrder.Descending;
+        }
+
         public void Messenger(IWpp.Messenger msg)
         {
+            //_wpp.WebHook("https://webhook.site/78e1d4ef-d787-41be-bbff-e769b241b9d4", msg);
             ListViewItem l = new ListViewItem();
-            l.Tag = LstReceived.Items.Count + 1;
-            l.Text = DateTime.Now.ToString();
+            l.Tag = msg.Id;
+            l.Text = msg.Date.ToString();
             l.SubItems.Add(msg.Sender);
             l.SubItems.Add(msg.Message);
             l.SubItems.Add(msg.Id);
-            LstReceived.Items.Add(l);
-            LstReceived.Sorting = SortOrder.Descending;
+            Action<ListViewItem> inv = AddList;
+            Invoke(inv, l);
         }
 
         private async void BtnLogout_Click(object sender, EventArgs e)
@@ -104,7 +111,7 @@ namespace WPP4DotNet.Exemple
                     Models.MessageModels msg = new Models.MessageModels();
                     msg.Recipient = textBox1.Text;
                     msg.Message = richTextBox1.Text;
-                    msg.Type = Models.Enum.MessageType.Text;
+                    msg.Type = Models.Enum.MessageType.chat;
                     Models.SendReturnModels ret = await _wpp.SendMessage(msg);
                     if (ret.Status)
                     {
@@ -145,6 +152,11 @@ namespace WPP4DotNet.Exemple
             {
                 MessageBox.Show("Error loading new image.");
             }
+        }
+
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }

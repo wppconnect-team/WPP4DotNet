@@ -9,17 +9,37 @@ using System.Threading.Tasks;
 using System.IO;
 using ZXing.QrCode;
 using System.Threading;
+using System.Collections.Generic;
+using System.Net;
+using RestSharp;
 
 namespace WPP4DotNet
 {
     public abstract class IWpp
     {
-        public string WebHook = "";
+        /// <summary>
+        /// WppPath
+        /// </summary>
         public string WppPath = "";
 
+        /// <summary>
+        /// JavaScript
+        /// </summary>
         private JavaScript js = new JavaScript();
+
+        /// <summary>
+        /// DriverStarted
+        /// </summary>
         private bool DriverStarted { get; set; }
+
+        /// <summary>
+        /// Internal WebDriver Interface
+        /// </summary>
         private IWebDriver Driver;
+
+        /// <summary>
+        /// WebDriver Interface
+        /// </summary>
         public IWebDriver WebDriver
         {
             get
@@ -32,8 +52,14 @@ namespace WPP4DotNet
             }
         }
 
+        /// <summary>
+        /// Internal Event Driver
+        /// </summary>
         private EventFiringWebDriver _eventDriver;
 
+        /// <summary>
+        /// Event Driver
+        /// </summary>
         public EventFiringWebDriver EventDriver
         {
             get
@@ -45,9 +71,13 @@ namespace WPP4DotNet
                 throw new NullReferenceException("Could not use WebDriver, you must start the StartDriver() class first!");
             }
         }
+
+        /// <summary>
+        /// This is the message class.
+        /// </summary>
         public class Messenger : EventArgs
         {
-            public Messenger(string id ,string sender, string message)
+            public Messenger(string id, string sender, string message)
             {
                 Date = DateTime.Now;
                 Id = id;
@@ -60,14 +90,37 @@ namespace WPP4DotNet
             public string Sender { get; }
         }
 
+        /// <summary>
+        /// This method delegates.
+        /// </summary>
+        /// <param name="e">Set the messenger</param>
         public delegate void EventReceived(Messenger e);
 
+        /// <summary>
+        /// This is a received event method.
+        /// </summary>
         public event EventReceived Received;
+
+        /// <summary>
+        /// This method checks incoming messages.
+        /// </summary>
+        /// <param name="id">Set the id</param>
+        /// <param name="sender">Set the sender</param>
+        /// <param name="message">Set the message</param>
         protected void CheckReceived(string id, string sender, string message)
         {
             Received?.Invoke(new Messenger(id, sender, message));
         }
-        private Bitmap CreateQRCode(int width, int height, string text,int margin = 0)
+
+        /// <summary>
+        /// This method transforms the text into a qrcode image.
+        /// </summary>
+        /// <param name="width">Set the width</param>
+        /// <param name="height">Set the height</param>
+        /// <param name="text">Set the text</param>
+        /// <param name="margin">Set the margin</param>
+        /// <returns>Returns an object of type Bitmap</returns>
+        private Bitmap CreateQRCode(int width, int height, string text, int margin = 0)
         {
             try
             {
@@ -109,12 +162,21 @@ namespace WPP4DotNet
             }
         }
 
+        /// <summary>
+        /// This method starts the selenium session, allowing you to save the cache and hide the browser.
+        /// </summary>
+        /// <param name="cache">If necessary define the directory to save the session data.</param>
+        /// <param name="hidden">Set true or false if you want to hide the browser.</param>
         public virtual void StartSession(string cache = "", bool hidden = false)
         {
             CheckDriverStarted();
             DriverStarted = true;
         }
 
+        /// <summary>
+        /// This method starts browsing and inserting JS scripts.
+        /// </summary>
+        /// <param name="driver">Insert the IWebDriver object.</param>
         public virtual void StartSession(IWebDriver driver)
         {
             this.Driver = driver;
@@ -123,6 +185,11 @@ namespace WPP4DotNet
             GetWppJS();
         }
 
+        /// <summary>
+        /// This method checks if the selenium driver is started.
+        /// </summary>
+        /// <param name="invert"></param>
+        /// <exception cref="NotSupportedException"></exception>
         protected void CheckDriverStarted(bool invert = false)
         {
             if (DriverStarted ^ invert)
@@ -131,27 +198,82 @@ namespace WPP4DotNet
             }
         }
 
-        public void Finish()
+        /// <summary>
+        /// This method ends the selenium session.
+        /// </summary>
+        /// <returns>Return True or False</returns>
+        public bool Finish()
         {
             try
             {
                 Driver.Quit();
                 Driver.Dispose();
+                return true;
             }
             catch (Exception)
             {
-                return;
+                return false;
             }
         }
 
-        public Task SearchMessage()
+        /// <summary>
+        /// This method in conjunction with "SearchMessage" allows sending a POST request to an external URL.
+        /// </summary>
+        /// <param name="url">Enter your external URL that will receive the POST.</param>
+        /// <param name="msg">Insert the "Messenger" object returned by the "SearchMessage" task.</param>
+        /// <returns>Return True or False</returns>
+        public bool WebHook(string url, Messenger msg)
+        {
+            try
+            {
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+                RestClient client = new RestClient(url);
+                RestRequest request = new RestRequest();
+                request.Method = Method.Post;
+                request.RequestFormat = DataFormat.Json;
+                request.AddHeader("Content-Type", "application/json");
+                request.AddJsonBody(new { Sender = msg.Sender, Message = msg.Message, Date = msg.Date });
+                RestResponse response = client.PostAsync(request).Result;
+                return response.StatusCode == HttpStatusCode.OK && !string.IsNullOrEmpty(response.Content) ? true : false;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// This method is a task that validates if there are unread messages, if so, it captures the information and marks it as viewed.
+        /// </summary>
+        /// <returns>Returns a Task</returns>
+        public async Task SearchMessage()
         {
             while (true)
             {
-
+                List<Models.ChatModel> chats = await ChatList("unread");
+                if(chats.Count > 0)
+                {
+                    foreach (var chat in chats)
+                    {
+                        foreach (var message in chat.Messages)
+                        {
+                            if(message.FromMe == false && message.Id == chat.LastMessage)
+                            {
+                                CheckReceived(message.Id,message.Sender,message.Message);
+                                MarkIsRead(chat.Id);
+                            }
+                        }
+                    }
+                }
             }
         }
 
+        /// <summary>
+        /// This method makes sending whatsapp messages.
+        /// </summary>
+        /// <param name="message">Enter the object (Models.MessageModels) of the message to be sent.</param>
+        /// <param name="simulateTyping">Enter true or false if you want to simulate typing.</param>
+        /// <returns>Returns the Models.SendReturnModels object</returns>
         public Task<Models.SendReturnModels> SendMessage(Models.MessageModels message, bool simulateTyping = false)
         {
             try
@@ -159,8 +281,8 @@ namespace WPP4DotNet
                 Models.SendReturnModels ret = new Models.SendReturnModels();
                 switch (message.Type)
                 {
-                    case Models.Enum.MessageType.Text:
-                        dynamic response = js.ExecuteReturnObj(Driver, String.Format("return WPP.chat.sendTextMessage('{0}','{1}')", message.Recipient, message.Message));
+                    case Models.Enum.MessageType.chat:
+                        dynamic response = js.ExecuteReturnObj(Driver, String.Format("return await WPP.chat.sendTextMessage('{0}','{1}')", message.Recipient, message.Message));
                         if (!string.IsNullOrEmpty(response["id"]))
                         {
                             ret.Id = response["id"];
@@ -174,31 +296,31 @@ namespace WPP4DotNet
                             ret.Error = "Error trying to send message.";
                         }
                         break;
-                    case Models.Enum.MessageType.Reply:
-                        break;
-                    case Models.Enum.MessageType.Sticker:
-                        break;
-                    case Models.Enum.MessageType.Mentioned:
-                        break;
-                    case Models.Enum.MessageType.Selection:
-                        break;
-                    case Models.Enum.MessageType.Button:
-                        break;
-                    case Models.Enum.MessageType.Contact:
-                        break;
-                    case Models.Enum.MessageType.Ptt:
-                        break;
-                    case Models.Enum.MessageType.Localization:
-                        break;
-                    case Models.Enum.MessageType.Link:
-                        break;
-                    case Models.Enum.MessageType.Audio:
-                    case Models.Enum.MessageType.Video:
-                    case Models.Enum.MessageType.Document:
-                    case Models.Enum.MessageType.Image:
-                        break;
-                    case Models.Enum.MessageType.Payment:
-                        break;
+                    //case Models.Enum.MessageType.Reply:
+                    //    break;
+                    //case Models.Enum.MessageType.Sticker:
+                    //    break;
+                    //case Models.Enum.MessageType.Mentioned:
+                    //    break;
+                    //case Models.Enum.MessageType.Selection:
+                    //    break;
+                    //case Models.Enum.MessageType.Button:
+                    //    break;
+                    //case Models.Enum.MessageType.Contact:
+                    //    break;
+                    //case Models.Enum.MessageType.Ptt:
+                    //    break;
+                    //case Models.Enum.MessageType.Localization:
+                    //    break;
+                    //case Models.Enum.MessageType.Link:
+                    //    break;
+                    //case Models.Enum.MessageType.Audio:
+                    //case Models.Enum.MessageType.Video:
+                    //case Models.Enum.MessageType.Document:
+                    //case Models.Enum.MessageType.Image:
+                    //    break;
+                    //case Models.Enum.MessageType.Payment:
+                    //    break;
                     default:
                         break;
                 }
@@ -213,22 +335,15 @@ namespace WPP4DotNet
             }
         }
 
+        /// <summary>
+        /// This method checks if the WPPJS script has been entered in the browser.
+        /// </summary>
+        /// <returns>Return True or False</returns>
         public Task<bool> IsInjected()
         {
             try
             {
-                return Task.FromResult(js.ExecuteReturnBool(Driver, "return WPP.isInjected"));
-            }
-            catch (Exception)
-            {
-                return Task.FromResult(false); 
-            }
-        }
-        public Task<bool> IsAuthenticated()
-        {
-            try
-            {
-                return Task.FromResult(js.ExecuteReturnBool(Driver, "return WPP.conn.isAuthenticated()"));
+                return Task.FromResult(js.ExecuteReturnBool(Driver, "return await WPP.isInjected"));
             }
             catch (Exception)
             {
@@ -236,11 +351,51 @@ namespace WPP4DotNet
             }
         }
 
-        public async Task<Image> GetAuthImage(int width = 300, int height = 300, bool refresh=false)
+        /// <summary>
+        /// This method checks if the qr code authentication has already been done.
+        /// </summary>
+        /// <returns>Return True or False</returns>
+        public Task<bool> IsAuthenticated()
         {
             try
             {
-                if(await IsInjected())
+                return Task.FromResult(js.ExecuteReturnBool(Driver, "return await WPP.conn.isAuthenticated()"));
+            }
+            catch (Exception)
+            {
+                return Task.FromResult(false);
+            }
+        }
+
+        /// <summary>
+        /// This method checks if whatsapp Main has been loaded.
+        /// </summary>
+        /// <returns>Return True or False</returns>
+        public Task<bool> IsMainLoaded()
+        {
+            try
+            {
+                return Task.FromResult(js.ExecuteReturnBool(Driver, "return await WPP.conn.isMainLoaded()"));
+            }
+            catch (Exception)
+            {
+                return Task.FromResult(false);
+            }
+        }
+
+        /// <summary>
+        /// This method takes the generated authentication code and creates a qrcode image of type "Image".
+        /// </summary>
+        /// <param name="width">Enter the width by default, it is already set to 300.</param>
+        /// <param name="height">Enter the height by default, it is already set to 300.</param>
+        /// <param name="refresh">Enter true or false if you want to reload the image.</param>
+        /// <returns>Returns the Image object</returns>
+        /// <exception cref="Exception"></exception>
+        public async Task<Image> GetAuthImage(int width = 300, int height = 300, bool refresh = false)
+        {
+            try
+            {
+                if (await IsInjected())
                 {
                     var pol = Policy<Image>
                     .Handle<Exception>()
@@ -290,11 +445,99 @@ namespace WPP4DotNet
             }
         }
 
+        /// <summary>
+        /// This method searches all chats and can be filtered by user, group, unread and label.
+        /// </summary>
+        /// <param name="filter">Use "group", "unread" or "label" to filter or leave blank to bring everything.</param>
+        /// <param name="value">Enter an array of strings to filter the desired label.</param>
+        /// <returns>Returns the Models.ChatModel object</returns>
+        public Task<List<Models.ChatModel>> ChatList(string filter = "", List<string> value = null)
+        {
+            try
+            {
+                var label = "";
+                if (value != null && filter == "label")
+                {
+                    foreach (var item in value)
+                    {
+                        label += string.Format(",'{0}'", item);
+                    }
+                    label = string.Format(",[{0}]", label.TrimStart(','));
+                }
+                IReadOnlyCollection<object> obj;
+                switch (filter)
+                {
+                    case "user":
+                    case "group":
+                    case "unread":
+                    case "label":
+                        obj = js.ExecuteReturnListObj(Driver, string.Format("return await WPP.chatList('{0}'{1})", filter, label));
+                        break;
+                    default:
+                        obj = js.ExecuteReturnListObj(Driver, "return await WPP.chatList()");
+                        break;
+                }
+                List<Models.ChatModel> chats = new List<Models.ChatModel>();
+                if(obj != null)
+                {
+                    Functions func = new Functions();
+                    foreach (dynamic response in obj)
+                    {
+                        Models.ChatModel chat = new Models.ChatModel();
+                        //Contact
+                        chat.Id = response["contact"]["id"];
+                        chat.Server = response["contact"]["server"];
+                        chat.Name = response["contact"]["name"];
+                        chat.PushName = response["contact"]["pushname"];
+                        chat.Image = response["contact"]["image"];
+                        chat.IsBroadcast = response["contact"]["isBroadcast"];
+                        chat.IsBusiness = response["contact"]["isBusiness"];
+                        chat.IsGroup = response["contact"]["isGroup"];
+                        chat.IsMe = response["contact"]["isMe"];
+                        chat.IsContact = response["contact"]["isMyContact"];
+                        chat.IsUser = response["contact"]["isUser"];
+                        chat.IsWAContact = response["contact"]["isWAContact"];
+                        
+                        //Messages
+                        chat.LastMessage = response["lastMessage"]["_serialized"];
+
+                        List<Models.MessageModels> messages = new List<Models.MessageModels>();
+                        foreach (var item in response["messages"])
+                        {
+                            Models.MessageModels message = new Models.MessageModels();
+                            message.Id = item["id"]["_serialized"];
+                            message.FromMe = item["id"]["fromMe"];
+                            message.Message = func.IsSet(item, "body") ? item["body"] : "";
+                            message.Type = (Models.Enum.MessageType)Enum.Parse(typeof(Models.Enum.MessageType), item["type"], true);
+                            message.Sender = item["from"]["user"];
+                            message.Recipient = item["to"]["user"];
+                            messages.Add(message);
+                        }
+                        chat.Messages = messages;
+
+                        //Others
+                        chat.HasUnread = response["hasUnread"];
+                        chat.Type = (Models.Enum.ChatType)Enum.Parse(typeof(Models.Enum.ChatType), response["type"], true);
+                        chats.Add(chat);
+                    }
+                }
+                return Task.FromResult(chats);
+            }
+            catch (Exception ex)
+            {
+                return Task.FromResult(new List<Models.ChatModel>());
+            }
+        }
+
+        /// <summary>
+        /// This method get the authentication code from the qr code.
+        /// </summary>
+        /// <returns>Returns STRING with authentication information.</returns>
         public Task<string> GetAuthCode()
         {
             try
             {
-                dynamic response = js.ExecuteReturnObj(Driver, "return WPP.conn.getAuthCode()");
+                dynamic response = js.ExecuteReturnObj(Driver, "return await WPP.conn.getAuthCode()");
                 return Task.FromResult(response["fullCode"]);
             }
             catch (Exception)
@@ -303,16 +546,38 @@ namespace WPP4DotNet
             }
         }
 
+        /// <summary>
+        /// This method reloads the authentication code from the qr code.
+        /// </summary>
+        /// <returns>Returns STRING with authentication information.</returns>
         public Task<string> GetAuthCodeRefresh()
         {
             try
             {
-                dynamic response = js.ExecuteReturnObj(Driver, "return WPP.conn.refreshQR()");
+                dynamic response = js.ExecuteReturnObj(Driver, "return await WPP.conn.refreshQR()");
                 return Task.FromResult(response["fullCode"]);
             }
             catch (Exception)
             {
                 return Task.FromResult("");
+            }
+        }
+
+        /// <summary>
+        /// This method marks the chat as viewed messages.
+        /// </summary>
+        /// <param name="chat">Inform the chat you want to set as read.</param>
+        /// <returns>Return True or False</returns>
+        public bool MarkIsRead(string chat)
+        {
+            try
+            {
+                js.Execute(Driver, string.Format("return WPP.chat.markIsRead('{0}')", chat));
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
             }
         }
 
@@ -330,7 +595,10 @@ namespace WPP4DotNet
                 return false;
             }
         }
-
+        /// <summary>
+        /// This method disconnects whatsapp web and ends the session.
+        /// </summary>
+        /// <returns>Return True or False</returns>
         public bool GetWppJS()
         {
             try
@@ -345,6 +613,7 @@ namespace WPP4DotNet
                     {
                         string wppjs = sr.ReadToEnd();
                         js.Execute(Driver, wppjs);
+                        js.Execute(Driver, CustomJS());
                         return true;
                     }
                 }
@@ -356,5 +625,15 @@ namespace WPP4DotNet
             }
         }
 
+        /// <summary>
+        /// This method customizes some calls to WPP JS generating new JS functions.
+        /// </summary>
+        /// <returns>Returns STRING from JS functions.</returns>
+        private string CustomJS()
+        {
+            string custom = "";
+            custom += "window.WPP.chatList=async function(d,e){let a=[];switch(d){case\"user\":a=await window.WPP.chat.list({onlyUsers:!0});break;case\"group\":a=await window.WPP.chat.list({onlyGroups:!0});break;case\"label\":a=await window.WPP.chat.list({withLabels:e});break;case\"unread\":a=await window.WPP.chat.list({onlyWithUnreadMessage:!0});break;default:a=await window.WPP.chat.list()}let c=[];for(let b=0;b<a.length;b++)if(a[b]){let f=await WPP.contact.getProfilePictureUrl(a[b].id.user),g={hasUnread:a[b].hasUnread,type:a[b].kind,messages:a[b].msgs._models,lastMessage:a[b].lastReceivedKey,contact:{id:a[b].id.user,server:a[b].id.server,name:a[b].formattedTitle,pushname:a[b].contact.pushname,isUser:a[b].isUser,isGroup:a[b].isGroup,isBroadcast:a[b].isBroadcast,isMe:a[b].contact.isMe,isBusiness:a[b].contact.isBusiness,isMyContact:a[b].contact.isMyContact,isWAContact:a[b].contact.isWAContact,image:f}};c.push(g)}return c}";
+            return custom;
+        }
     }
 }

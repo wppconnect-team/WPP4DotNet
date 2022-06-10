@@ -10,6 +10,11 @@ namespace WPP4DotNet.Utils
 {
     internal class GitHub
     {
+        /// <summary>
+        /// This method checks if you have WPPJS updates on GitHUb, if you do, download and update.
+        /// </summary>
+        /// <param name="directory">Set the directory if you want to change the default location.</param>
+        /// <returns>Return True or False</returns>
         internal bool CheckUpdate(string directory = "")
         {
             try
@@ -71,6 +76,14 @@ namespace WPP4DotNet.Utils
                 return false;
             }
         }
+
+        /// <summary>
+        /// This method validates which is the last release generated on GitHub.
+        /// </summary>
+        /// <param name="username">Set the user name.</param>
+        /// <param name="repository">Set the repository.</param>
+        /// <param name="tag">Set the tag, by default it uses "latest".</param>
+        /// <returns></returns>
         internal Release CheckRelease(string username, string repository, string tag="")
         {
             try
@@ -96,6 +109,16 @@ namespace WPP4DotNet.Utils
                 return new Release();
             }
         }
+
+        /// <summary>
+        /// This method downloads and decompresses files.
+        /// </summary>
+        /// <param name="url">Set the URL.</param>
+        /// <param name="path">Set the Path.</param>
+        /// <param name="fileName">Set the file name.</param>
+        /// <param name="unZip">Set true or false if you want to unzip.</param>
+        /// <param name="deleteZip">set true or false if you want to delete.</param>
+        /// <returns>Return True or False</returns>
         private bool Download(string url, string path, string fileName, bool unZip = false, bool deleteZip = false)
         {
             try
@@ -121,6 +144,14 @@ namespace WPP4DotNet.Utils
                 return false;
             }
         }
+
+        /// <summary>
+        /// This method decompresses ZIP files.
+        /// </summary>
+        /// <param name="archive">Set the archive.</param>
+        /// <param name="destination">Set the destination.</param>
+        /// <param name="overwrite">Set true or false if you want to override.</param>
+        /// <returns>Return True or False</returns>
         private bool Unzip(string archive, string destination, bool overwrite)
         {
             try

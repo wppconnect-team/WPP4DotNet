@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -9,16 +10,33 @@ namespace WPP4DotNet.Utils
 {
     internal class Functions
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="stringtoencode"></param>
+        /// <returns></returns>
         internal static string EncodeBase64(string stringtoencode)
         {
             byte[] data = Encoding.ASCII.GetBytes(stringtoencode);
             return Convert.ToBase64String(data);
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="StringtoDecode"></param>
+        /// <returns></returns>
         internal static string DecodeBase64(string StringtoDecode)
         {
             byte[] data = Convert.FromBase64String(StringtoDecode);
             return ASCIIEncoding.ASCII.GetString(data);
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
         internal string MD5(string input)
         {
             System.Security.Cryptography.MD5 md5 = System.Security.Cryptography.MD5.Create();
@@ -31,6 +49,12 @@ namespace WPP4DotNet.Utils
             }
             return sb.ToString();
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
         internal byte[] DownloadImageByte(string url)
         {
             try
@@ -46,6 +70,13 @@ namespace WPP4DotNet.Utils
                 return null;
             }
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="url"></param>
+        /// <param name="path"></param>
+        /// <returns></returns>
         internal string DownloadImage(string url, string path)
         {
             if (!Directory.Exists(path))
@@ -68,6 +99,12 @@ namespace WPP4DotNet.Utils
             }
             return file;
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="number"></param>
+        /// <returns></returns>
         internal string ClearNumber(string number)
         {
             number = number.Replace("+", "").Trim();
@@ -79,6 +116,12 @@ namespace WPP4DotNet.Utils
             number = number.Replace(@"\", "");
             return number.Trim();
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="fileName"></param>
+        /// <returns></returns>
         internal string ConvertFileToBase64(string fileName)
         {
             string Extension = Path.GetExtension(fileName);
@@ -123,6 +166,17 @@ namespace WPP4DotNet.Utils
                     break;
             }
             return MimeType + Convert.ToBase64String(System.IO.File.ReadAllBytes(fileName));
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        internal bool IsSet(dynamic obj, string name)
+        {
+            return ((IDictionary<string, object>)obj).ContainsKey(name);
         }
     }
 }
