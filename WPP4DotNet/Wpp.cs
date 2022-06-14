@@ -428,7 +428,8 @@ namespace WPP4DotNet
                                 }
                                 catch (Exception)
                                 {
-                                    throw new Exception("Image not found!");
+                                    //throw new Exception("Image not found!");
+                                    return null; 
                                 }
                             });
                         }
@@ -436,12 +437,14 @@ namespace WPP4DotNet
                 }
                 else
                 {
-                    throw new Exception("WPP not found!");
+                    //throw new Exception("WPP not found!");
+                    return null;
                 }
             }
             catch (Exception)
             {
-                throw new Exception("Image not found!");
+                //throw new Exception("Image not found!");
+                return null;
             }
         }
 

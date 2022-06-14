@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -26,11 +27,14 @@ namespace WPP4DotNet.Exemple
             StartService(new ChromeWebApp());
         }
 
-        public void StartService(IWpp wpp, string cache = "")
+        public void StartService(IWpp wpp, string session = "")
         {
             _wpp = wpp;
-            _wpp.StartSession();
-            panel2.Visible = true;
+            _wpp.StartSession(session, checkBox3.Checked);
+            if (string.IsNullOrEmpty(session))
+            {
+                panel2.Visible = true;
+            }
             label3.Text = "Waiting!";
             label3.ForeColor = Color.DodgerBlue;
             thr = new Thread(Service);
@@ -40,10 +44,19 @@ namespace WPP4DotNet.Exemple
 
         public async void Service()
         {
-            pictureBox1.Image = await _wpp.GetAuthImage();
+            if (!string.IsNullOrEmpty(await _wpp.GetAuthCode()))
+            {
+                pictureBox1.Image = await _wpp.GetAuthImage();
+            }
             while (true)
             {
                 if (await _wpp.IsAuthenticated())
+                {
+                    Action<bool> inv = Connected;
+                    Invoke(inv, true);
+                    break;
+                }
+                if (await _wpp.IsMainLoaded())
                 {
                     Action<bool> inv = Connected;
                     Invoke(inv, true);
@@ -67,9 +80,36 @@ namespace WPP4DotNet.Exemple
             LstReceived.Sorting = SortOrder.Descending;
         }
 
-        public void Messenger(IWpp.Messenger msg)
+        public async void Messenger(IWpp.Messenger msg)
         {
-            //_wpp.WebHook("https://webhook.site/78e1d4ef-d787-41be-bbff-e769b241b9d4", msg);
+            //WebHook
+            if (checkBox1.Checked)
+            {
+                _wpp.WebHook(textBox4.Text, msg);
+            }
+
+            //Auto Answer
+            if (checkBox2.Checked)
+            {
+                var message = (string)richTextBox4.Invoke(new Func<string>(() => richTextBox4.Text));
+                var keyword = textBox6.Text.Split(',');
+                foreach (var item in keyword)
+                {
+                    if(item.ToLower().Trim() == msg.Message.ToLower().Trim())
+                    {
+                        Models.MessageModels model = new Models.MessageModels();
+                        model.Recipient = msg.Sender;
+                        model.Message = message;
+                        model.Type = Models.Enum.MessageType.chat;
+                        Models.SendReturnModels ret = await _wpp.SendMessage(model);
+                        Action<Models.SendReturnModels,string> inv2 = SaveSend;
+                        Invoke(inv2, ret,message);
+                    }
+                }
+                
+            }
+
+            //Add incoming messages to ListView
             ListViewItem l = new ListViewItem();
             l.Tag = msg.Id;
             l.Text = msg.Date.ToString();
@@ -113,23 +153,9 @@ namespace WPP4DotNet.Exemple
                     msg.Message = richTextBox1.Text;
                     msg.Type = Models.Enum.MessageType.chat;
                     Models.SendReturnModels ret = await _wpp.SendMessage(msg);
-                    if (ret.Status)
-                    {
-                        textBox1.Text = "";
-                        richTextBox1.Text = "";
-                        ListViewItem l = new ListViewItem();
-                        l.Tag = LstSent.Items.Count + 1;
-                        l.Text = DateTime.Now.ToString();
-                        l.SubItems.Add(msg.Message);
-                        l.SubItems.Add(ret.Id);
-                        LstSent.Items.Add(l);
-                        LstSent.Sorting = SortOrder.Descending;
-                    }
-                    else
-                    {
-                        MessageBox.Show(ret.Error);
-                    }
-
+                    SaveSend(ret, msg.Message);
+                    textBox1.Text = "";
+                    richTextBox1.Text = "";
                 }
                 else
                 {
@@ -139,6 +165,24 @@ namespace WPP4DotNet.Exemple
             catch (Exception)
             {
                 MessageBox.Show("To send messages you need to log in.");
+            }
+        }
+
+        private void SaveSend(Models.SendReturnModels ret,string message)
+        {
+            if (ret.Status)
+            {
+                ListViewItem l = new ListViewItem();
+                l.Tag = LstSent.Items.Count + 1;
+                l.Text = DateTime.Now.ToString();
+                l.SubItems.Add(message);
+                l.SubItems.Add(ret.Id);
+                LstSent.Items.Add(l);
+                LstSent.Sorting = SortOrder.Descending;
+            }
+            else
+            {
+                MessageBox.Show(ret.Error);
             }
         }
 
@@ -154,9 +198,17 @@ namespace WPP4DotNet.Exemple
             }
         }
 
-        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        private void button3_Click(object sender, EventArgs e)
         {
+            var path = Path.Combine(Environment.CurrentDirectory, "Session");
+            var name = Guid.NewGuid().ToString("N");
+            StartService(new ChromeWebApp(), Path.Combine(path, name));
+        }
 
+        private void button4_Click(object sender, EventArgs e)
+        {
+            var path = textBox5.Text;
+            StartService(new ChromeWebApp(), path);
         }
     }
 }

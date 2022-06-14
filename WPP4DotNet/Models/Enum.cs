@@ -7,10 +7,10 @@
         /// </summary>
         public enum Browser
         {
-            Chrome,
-            Firefox,
-            Edge,
-            Opera
+            chrome,
+            firefox,
+            edge,
+            opera
         }
 
         /// <summary>
@@ -50,10 +50,10 @@
         /// </summary>
         public enum Status
         {
-            Connected,
-            Disconnected,
-            QrCode,
-            Error
+            connected,
+            disconnected,
+            qrcode,
+            error
         }
     }
 }
