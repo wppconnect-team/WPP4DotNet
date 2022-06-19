@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -46,7 +45,9 @@ namespace WPP4DotNet.Exemple
         {
             if (!string.IsNullOrEmpty(await _wpp.GetAuthCode()))
             {
-                pictureBox1.Image = await _wpp.GetAuthImage();
+                Image image = await _wpp.GetAuthImage();
+                Action<Image> inv = QrCode;
+                Invoke(inv, image);
             }
             while (true)
             {
@@ -65,6 +66,11 @@ namespace WPP4DotNet.Exemple
             }
             _wpp.Received += Messenger;
             _ = Task.Run(() => _wpp.SearchMessage());
+        }
+
+        public void QrCode(Image image)
+        {
+            pictureBox1.Image = image;
         }
 
         public void Connected(bool status)
@@ -97,11 +103,7 @@ namespace WPP4DotNet.Exemple
                 {
                     if(item.ToLower().Trim() == msg.Message.ToLower().Trim())
                     {
-                        Models.MessageModels model = new Models.MessageModels();
-                        model.Recipient = msg.Sender;
-                        model.Message = message;
-                        model.Type = Models.Enum.MessageType.chat;
-                        Models.SendReturnModels ret = await _wpp.SendMessage(model);
+                        Models.SendReturnModels ret = await _wpp.SendMessage(msg.Sender, message);
                         Action<Models.SendReturnModels,string> inv2 = SaveSend;
                         Invoke(inv2, ret,message);
                     }
@@ -126,12 +128,14 @@ namespace WPP4DotNet.Exemple
             {
                 if (await _wpp.IsAuthenticated())
                 {
+                    //Logout Session
                     _wpp.Logout();
                 }
-                else
-                {
-                    _wpp.Finish();
-                }
+                //Closed Selenium
+                _wpp.Finish();
+
+                //Google Chrome Kill All Process
+                KillChromeDriverProcesses();
                 label3.Text = "Disconnected!";
                 label3.ForeColor = Color.Firebrick;
                 panel2.Visible = false;
@@ -142,18 +146,24 @@ namespace WPP4DotNet.Exemple
             }
         }
 
+        //Use if you want to clear pending processes after logging out of selenium using Google Chrome.
+        private void KillChromeDriverProcesses()
+        {
+            Process[] chromeDriverProcesses = Process.GetProcessesByName("chromedriver");
+            foreach (var chromeDriverProcess in chromeDriverProcesses)
+            {
+                chromeDriverProcess.Kill();
+            }
+        }
+
         private async void BtnSend_Click(object sender, EventArgs e)
         {
             try
             {
                 if (await _wpp.IsAuthenticated())
                 {
-                    Models.MessageModels msg = new Models.MessageModels();
-                    msg.Recipient = textBox1.Text;
-                    msg.Message = richTextBox1.Text;
-                    msg.Type = Models.Enum.MessageType.chat;
-                    Models.SendReturnModels ret = await _wpp.SendMessage(msg);
-                    SaveSend(ret, msg.Message);
+                    Models.SendReturnModels ret = await _wpp.SendMessage(textBox1.Text, richTextBox1.Text);
+                    SaveSend(ret, richTextBox1.Text);
                     textBox1.Text = "";
                     richTextBox1.Text = "";
                 }
@@ -209,6 +219,113 @@ namespace WPP4DotNet.Exemple
         {
             var path = textBox5.Text;
             StartService(new ChromeWebApp(), path);
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog dialog = new OpenFileDialog();
+
+            if (dialog.ShowDialog() == DialogResult.OK)
+            {
+                var ext = Path.GetExtension(dialog.FileName);
+                textBox3.Text = dialog.FileName;
+            }
+        }
+
+        private async void button1_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (await _wpp.IsAuthenticated())
+                {
+                    var base64 = ConvertFileToBase64(textBox3.Text);
+                    var type = FileType(textBox3.Text);
+                    List<string> options = new List<string>();
+                    options.Add(string.Format("type: '{0}'",type));
+                    options.Add(string.Format("caption: '{0}'", richTextBox2.Text));
+                    Models.SendReturnModels ret = await _wpp.SendFileMessage(textBox2.Text, base64, options);
+                    SaveSend(ret, richTextBox1.Text);
+                    //textBox2.Text = "";
+                    //textBox3.Text = "";
+                    //richTextBox2.Text = "";
+                }
+                else
+                {
+                    MessageBox.Show("To send file messages you need to log in.");
+                }
+            }
+            catch (Exception)
+            {
+                MessageBox.Show("To send file messages you need to log in.");
+            }
+        }
+
+        private string ConvertFileToBase64(string fileName)
+        {
+            string Extension = Path.GetExtension(fileName);
+            string MimeType;
+            switch (Extension.ToLower())
+            {
+                case ".jpg":
+                    MimeType = "data:image/jpg;base64,";
+                    break;
+                case ".jpeg":
+                    MimeType = "data:image/jpeg;base64,";
+                    break;
+                case ".gif":
+                    MimeType = "data:image/gif;base64,";
+                    break;
+                case ".png":
+                    MimeType = "data:image/png;base64,";
+                    break;
+                case ".bmp":
+                    MimeType = "data:image/bmp;base64,";
+                    break;
+                case ".ico":
+                    MimeType = "data:image/x-icon;base64,";
+                    break;
+                case ".pdf":
+                    MimeType = "data:application/pdf;base64,";
+                    break;
+                case ".mp3":
+                    MimeType = "data:audio/mp3;base64,";
+                    break;
+                case ".mp4":
+                    MimeType = "data:video/mp4;base64,";
+                    break;
+                case ".mpeg":
+                    MimeType = "data:application/mpeg;base64,";
+                    break;
+                case ".txt":
+                    MimeType = "data:text/plain;base64,";
+                    break;
+                default:
+                    MimeType = "data:application/octet-stream;base64,";
+                    break;
+            }
+            return MimeType + Convert.ToBase64String(System.IO.File.ReadAllBytes(fileName));
+        }
+
+        private string FileType(string fileName)
+        {
+            string Extension = Path.GetExtension(fileName);
+            switch (Extension.ToLower())
+            {
+                case ".jpg":
+                case ".jpeg":
+                case ".gif":
+                case ".png":
+                case ".bmp":
+                case ".ico":
+                    return "image";
+                case ".mp3":
+                    return "audio";
+                case ".mp4":
+                case ".mpeg":
+                    return "video";
+                default:
+                    return "document";
+            }
         }
     }
 }

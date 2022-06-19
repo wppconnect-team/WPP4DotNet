@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace WPP4DotNet.Models
 {
@@ -21,7 +22,7 @@ namespace WPP4DotNet.Models
         public bool IsBroadcast { get; set; }
         public bool IsGroup { get; set; }
         public bool IsUser { get; set; }
-        public Enum.ChatType Type { get; set; }
+        public string Type { get; set; }
         public string LastMessage { get; set; }
         public List<MessageModels> Messages { get; set; }
     }
@@ -35,8 +36,9 @@ namespace WPP4DotNet.Models
         public string Sender { get; set; }
         public string Recipient { get; set; }
         public bool FromMe { get; set; }
+        public bool SimulateTyping { get; set; }
         public string Message { get; set; }
-        public Enum.MessageType Type { get; set; }
+        public string Type { get; set; }
         public FileModels File { get; set; }
         public ContactModels Contact { get; set; }
         public LocationModels Location { get; set; }
@@ -133,5 +135,40 @@ namespace WPP4DotNet.Models
         public int Id { get; set; }
         public string Text { get; set; }
         public int Type { get; set; }
+    }
+
+    /// <summary>
+    /// GroupInfoModels
+    /// </summary>
+    public class GroupInfoModels
+    {
+        public string Id { get; set; }
+        public bool IsParentGroup { get; set; }
+        public bool Announce { get; set; }
+        public DateTime Creation { get; set; }
+        public bool DefaultSubgroup { get; set; }
+        public string Desc { get; set; }
+        public string DescID { get; set; }
+        public string DescOwner { get; set; }
+        public DateTime DescTime { get; set; }
+        public bool NoFrequentlyForwarded { get; set; }
+        public int NumSubgroups { get; set; }
+        public string Owner { get; set; }
+        public List<ParticipantsModels> Participants { get; set; }
+        public string PvId { get; set; }
+        public bool Restrict { get; set; }
+        public int Size { get; set; }
+        public int Status { get; set; }
+        public string Subject { get; set; }
+        public string SubjectOwner { get; set; }
+        public DateTime SubjectTime { get; set; }
+        public bool Support { get; set; }
+        public bool Suspended { get; set; }
+    }
+    public class ParticipantsModels
+    {
+        public string Id { get; set; }
+        public bool IsAdmin { get; set; }
+        public bool IsSuperAdmin { get; set; }
     }
 }

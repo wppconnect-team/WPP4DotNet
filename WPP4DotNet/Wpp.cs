@@ -8,15 +8,16 @@ using System;
 using System.Threading.Tasks;
 using System.IO;
 using ZXing.QrCode;
-using System.Threading;
 using System.Collections.Generic;
 using System.Net;
 using RestSharp;
+using System.Threading;
 
 namespace WPP4DotNet
 {
     public abstract class IWpp
     {
+        #region WPP4DotNet - Library Functions
         /// <summary>
         /// WppPath
         /// </summary>
@@ -267,71 +268,137 @@ namespace WPP4DotNet
                 }
             }
         }
+        #endregion
 
+        #region WPP4DotNet - JavaScript
         /// <summary>
-        /// This method makes sending whatsapp messages.
+        /// This method downloads and updates the latest version of wppconnect-wa.js.
         /// </summary>
-        /// <param name="message">Enter the object (Models.MessageModels) of the message to be sent.</param>
-        /// <param name="simulateTyping">Enter true or false if you want to simulate typing.</param>
-        /// <returns>Returns the Models.SendReturnModels object</returns>
-        public Task<Models.SendReturnModels> SendMessage(Models.MessageModels message, bool simulateTyping = false)
+        /// <returns>Return True or False</returns>
+        public bool GetWppJS()
         {
             try
             {
-                Models.SendReturnModels ret = new Models.SendReturnModels();
-                switch (message.Type)
+                GitHub github = new GitHub();
+                github.CheckUpdate(WppPath);
+                string path = string.IsNullOrEmpty(WppPath) ? Path.Combine(Environment.CurrentDirectory, "WppConnect") : WppPath;
+                string file = Path.Combine(path, "wppconnect-wa.js");
+                if (File.Exists(file))
                 {
-                    case Models.Enum.MessageType.chat:
-                        dynamic response = js.ExecuteReturnObj(Driver, String.Format("return await WPP.chat.sendTextMessage('{0}','{1}')", message.Recipient, message.Message));
-                        if (!string.IsNullOrEmpty(response["id"]))
-                        {
-                            ret.Id = response["id"];
-                            ret.Sender = "";
-                            ret.Recipient = message.Recipient;
-                            ret.Status = true;
-                        }
-                        else
-                        {
-                            ret.Status = false;
-                            ret.Error = "Error trying to send message.";
-                        }
-                        break;
-                    //case Models.Enum.MessageType.Reply:
-                    //    break;
-                    //case Models.Enum.MessageType.Sticker:
-                    //    break;
-                    //case Models.Enum.MessageType.Mentioned:
-                    //    break;
-                    //case Models.Enum.MessageType.Selection:
-                    //    break;
-                    //case Models.Enum.MessageType.Button:
-                    //    break;
-                    //case Models.Enum.MessageType.Contact:
-                    //    break;
-                    //case Models.Enum.MessageType.Ptt:
-                    //    break;
-                    //case Models.Enum.MessageType.Localization:
-                    //    break;
-                    //case Models.Enum.MessageType.Link:
-                    //    break;
-                    //case Models.Enum.MessageType.Audio:
-                    //case Models.Enum.MessageType.Video:
-                    //case Models.Enum.MessageType.Document:
-                    //case Models.Enum.MessageType.Image:
-                    //    break;
-                    //case Models.Enum.MessageType.Payment:
-                    //    break;
-                    default:
-                        break;
+                    using (StreamReader sr = new StreamReader(file))
+                    {
+                        string wppjs = sr.ReadToEnd();
+                        js.Execute(Driver, wppjs);
+                        js.Execute(Driver, CustomJS());
+                        return true;
+                    }
                 }
-                return Task.FromResult(ret);
+                return false;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Models.SendReturnModels ret = new Models.SendReturnModels();
-                ret.Error = ex.Message;
-                ret.Status = false;
-                return Task.FromResult(ret);
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// This method customizes some calls to WPP JS generating new JS functions.
+        /// </summary>
+        /// <returns>Returns STRING from JS functions.</returns>
+        private string CustomJS()
+        {
+            string custom = "";
+            custom += "window.WPP.chatList=async function(d,e){let a=[];switch(d){case\"user\":a=await window.WPP.chat.list({onlyUsers:!0});break;case\"group\":a=await window.WPP.chat.list({onlyGroups:!0});break;case\"label\":a=await window.WPP.chat.list({withLabels:e});break;case\"unread\":a=await window.WPP.chat.list({onlyWithUnreadMessage:!0});break;default:a=await window.WPP.chat.list()}let c=[];for(let b=0;b<a.length;b++)if(a[b]){let f=await WPP.contact.getProfilePictureUrl(a[b].id.user),g={hasUnread:a[b].hasUnread,type:a[b].kind,messages:a[b].msgs._models,lastMessage:a[b].lastReceivedKey,contact:{id:a[b].id.user,server:a[b].id.server,name:a[b].formattedTitle,pushname:a[b].contact.pushname,isUser:a[b].isUser,isGroup:a[b].isGroup,isBroadcast:a[b].isBroadcast,isMe:a[b].contact.isMe,isBusiness:a[b].contact.isBusiness,isMyContact:a[b].contact.isMyContact,isWAContact:a[b].contact.isWAContact,image:f}};c.push(g)}return c}";
+            custom += ",window.WPP.chatFind=async function(b){let a=await window.WPP.chat.find(b),c=await WPP.contact.getProfilePictureUrl(a.id.user),d={hasUnread:a.hasUnread,type:a.kind,messages:a.msgs._models,lastMessage:a.lastReceivedKey,contact:{id:a.id.user,server:a.id.server,name:a.formattedTitle,pushname:a.contact.pushname,isUser:a.isUser,isGroup:a.isGroup,isBroadcast:a.isBroadcast,isMe:a.contact.isMe,isBusiness:a.contact.isBusiness,isMyContact:a.contact.isMyContact,isWAContact:a.contact.isWAContact,image:c}};return d}";
+            custom += ",window.WPP.contactList=async function(d,e){let a=[];switch(d){case\"my\":a=await window.WPP.contact.list({onlyMyContacts:!0});break;case\"label\":a=await window.WPP.contact.list({withLabels:e});break;default:a=await window.WPP.contact.list()}let c=[];for(let b=0;b<a.length;b++)if(a[b]){let f=await WPP.contact.getProfilePictureUrl(a[b].id.user),g={id:a[b].id.user,server:a[b].id.server,name:a[b].name,pushname:a[b].formattedName,isUser:a[b].isUser,isGroup:a[b].isGroup,isBroadcast:a[b].isBroadcast,isMe:a[b].isMe,isBusiness:a[b].isBusiness,isMyContact:a[b].isMyContact,isWAContact:a[b].isWAContact,image:f};c.push(g)}return c}";
+            return custom;
+        }
+        #endregion
+
+        #region WPPJS CONN - Functions
+        /// <summary>
+        /// This method get the authentication code from the qr code.
+        /// </summary>
+        /// <returns>Returns STRING with authentication information.</returns>
+        public Task<string> GetAuthCode()
+        {
+            try
+            {
+                Thread.Sleep(1000);
+                dynamic response = js.ExecuteReturnObj(Driver, "return await WPP.conn.getAuthCode()");
+                return Task.FromResult(response["fullCode"]);
+            }
+            catch (Exception)
+            {
+                return Task.FromResult("");
+            }
+        }
+
+        /// <summary>
+        /// This method reloads the authentication code from the qr code.
+        /// </summary>
+        /// <returns>Returns STRING with authentication information.</returns>
+        public Task<string> GetAuthCodeRefresh()
+        {
+            try
+            {
+                dynamic response = js.ExecuteReturnObj(Driver, "return await WPP.conn.refreshQR()");
+                return Task.FromResult(response["fullCode"]);
+            }
+            catch (Exception)
+            {
+                return Task.FromResult("");
+            }
+        }
+
+        /// <summary>
+        /// This method return the current logged user ID with device id.
+        /// </summary>
+        /// <returns>Returns STRING with my id (Phone Number)</returns>
+        public Task<string> GetMyDeviceId()
+        {
+            try
+            {
+                dynamic response = js.ExecuteReturnObj(Driver, "return await WPP.conn.getMyDeviceId()");
+                return Task.FromResult(string.Format("{0},{1},{2},{3}", response["device"], response["server"], response["user"], response["_serialized"]));
+            }
+            catch (Exception)
+            {
+                return Task.FromResult("");
+            }
+        }
+        
+        /// <summary>
+        /// This method return the current logged user ID with device id.
+        /// </summary>
+        /// <returns>Returns STRING with my id (Phone Number)</returns>
+        public Task<string> GetMyUserId()
+        {
+            try
+            {
+                dynamic response = js.ExecuteReturnObj(Driver, "return await WPP.conn.getMyUserId()");
+                return Task.FromResult(string.Format("{0},{1},{2}", response["server"], response["user"], response["_serialized"]));
+            }
+            catch (Exception)
+            {
+                return Task.FromResult("");
+            }
+        }
+
+        /// <summary>
+        /// This method return my number.
+        /// </summary>
+        /// <returns>Returns STRING with my id (Phone Number)</returns>
+        public Task<string> GetMyNumber()
+        {
+            try
+            {
+                dynamic response = js.ExecuteReturnObj(Driver, "return await WPP.conn.getMyUserId()");
+                return Task.FromResult(string.Format("{0}", response["user"]));
+            }
+            catch (Exception)
+            {
+                return Task.FromResult("");
             }
         }
 
@@ -384,6 +451,161 @@ namespace WPP4DotNet
         }
 
         /// <summary>
+        /// This method checks is idle.
+        /// </summary>
+        /// <returns>Return True or False</returns>
+        public Task<bool> IsIdle()
+        {
+            try
+            {
+                return Task.FromResult(js.ExecuteReturnBool(Driver, "return await WPP.conn.isIdle()"));
+            }
+            catch (Exception)
+            {
+                return Task.FromResult(false);
+            }
+        }
+
+        /// <summary>
+        /// This method checks is multi device.
+        /// </summary>
+        /// <returns>Return True or False</returns>
+        public Task<bool> IsMultiDevice()
+        {
+            try
+            {
+                return Task.FromResult(js.ExecuteReturnBool(Driver, "return await WPP.conn.isMultiDevice()"));
+            }
+            catch (Exception)
+            {
+                return Task.FromResult(false);
+            }
+        }
+
+        /// <summary>
+        /// This method disconnects whatsapp web and ends the session.
+        /// </summary>
+        /// <returns>Return True or False</returns>
+        public bool Logout()
+        {
+            try
+            {
+                js.Execute(Driver, "return WPP.conn.logout()");
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// This method set keep alive state, that will force the focused and online state.
+        /// </summary>
+        /// <param name="status">Inform true or false.</param>
+        /// <returns>Return True or False</returns>
+        public Task<bool> SetKeepAlive(bool status)
+        {
+            try
+            {
+                return Task.FromResult(js.ExecuteReturnBool(Driver, string.Format("return await WPP.conn.setKeepAlive({0})",status)));
+            }
+            catch (Exception)
+            {
+                return Task.FromResult(false);
+            }
+        }
+
+        /// <summary>
+        /// This method if it's true, WhatsApp WEB will switch to MD. If it's false, WhatsApp WEB will switch to Legacy.
+        /// </summary>
+        /// <param name="status">Inform true or false.</param>
+        /// <returns>Return True or False</returns>
+        public Task<bool> SetMultiDevice(bool status)
+        {
+            try
+            {
+                return Task.FromResult(js.ExecuteReturnBool(Driver, string.Format("return await WPP.conn.setMultiDevice({0})", status)));
+            }
+            catch (Exception)
+            {
+                return Task.FromResult(false);
+            }
+        }
+        #endregion
+
+        #region WPPJS CHAT - Chat Functions
+        /// <summary>
+        /// This method archives and unarchives the chats.
+        /// </summary>
+        /// <param name="chat">Inform the chat.</param>
+        /// <param name="status">Inform true or false.</param>
+        /// <returns>Return True or False</returns>
+        public Task<bool> ChatArchive(string chat, bool status)
+        {
+            try
+            {
+                return Task.FromResult(js.ExecuteReturnBool(Driver, string.Format("return await WPP.chat.archive('{0}',{1})", chat, status)));
+            }
+            catch (Exception)
+            {
+                return Task.FromResult(false);
+            }
+        }
+
+        /// <summary>
+        /// This method checks if is possible to mute this chat.
+        /// </summary>
+        /// <returns>Return True or False</returns>
+        public Task<bool> CanMute()
+        {
+            try
+            {
+                return Task.FromResult(js.ExecuteReturnBool(Driver, "return await WPP.conn.canMute()"));
+            }
+            catch (Exception)
+            {
+                return Task.FromResult(false);
+            }
+        }
+
+        /// <summary>
+        /// This method clear a chat message.
+        /// </summary>
+        /// <param name="chat">Inform the chat.</param>
+        /// <returns>Return True or False</returns>
+        public bool ChatClear(string chat)
+        {
+            try
+            {
+                js.Execute(Driver, string.Format("return await WPP.chat.clear('{0}')", chat));
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// This method delete a chat.
+        /// </summary>
+        /// <param name="chat">Inform the chat.</param>
+        /// <returns>Return True or False</returns>
+        public bool ChatDelete(string chat)
+        {
+            try
+            {
+                js.Execute(Driver, string.Format("return await WPP.chat.delete('{0}')", chat));
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
         /// This method takes the generated authentication code and creates a qrcode image of type "Image".
         /// </summary>
         /// <param name="width">Enter the width by default, it is already set to 300.</param>
@@ -429,7 +651,7 @@ namespace WPP4DotNet
                                 catch (Exception)
                                 {
                                     //throw new Exception("Image not found!");
-                                    return null; 
+                                    return null;
                                 }
                             });
                         }
@@ -451,9 +673,9 @@ namespace WPP4DotNet
         /// <summary>
         /// This method searches all chats and can be filtered by user, group, unread and label.
         /// </summary>
-        /// <param name="filter">Use "group", "unread" or "label" to filter or leave blank to bring everything.</param>
+        /// <param name="filter">Use "user", "group", "unread" or "label" to filter or leave blank to bring everything.</param>
         /// <param name="value">Enter an array of strings to filter the desired label.</param>
-        /// <returns>Returns the Models.ChatModel object</returns>
+        /// <returns>Returns the List Models.ChatModel object</returns>
         public Task<List<Models.ChatModel>> ChatList(string filter = "", List<string> value = null)
         {
             try
@@ -481,7 +703,7 @@ namespace WPP4DotNet
                         break;
                 }
                 List<Models.ChatModel> chats = new List<Models.ChatModel>();
-                if(obj != null)
+                if (obj != null)
                 {
                     Functions func = new Functions();
                     foreach (dynamic response in obj)
@@ -500,7 +722,7 @@ namespace WPP4DotNet
                         chat.IsContact = response["contact"]["isMyContact"];
                         chat.IsUser = response["contact"]["isUser"];
                         chat.IsWAContact = response["contact"]["isWAContact"];
-                        
+
                         //Messages
                         chat.LastMessage = response["lastMessage"]["_serialized"];
 
@@ -511,7 +733,7 @@ namespace WPP4DotNet
                             message.Id = item["id"]["_serialized"];
                             message.FromMe = item["id"]["fromMe"];
                             message.Message = func.IsSet(item, "body") ? item["body"] : "";
-                            message.Type = (Models.Enum.MessageType)Enum.Parse(typeof(Models.Enum.MessageType), item["type"], true);
+                            message.Type = item["type"];
                             message.Sender = item["from"]["user"];
                             message.Recipient = item["to"]["user"];
                             messages.Add(message);
@@ -520,62 +742,123 @@ namespace WPP4DotNet
 
                         //Others
                         chat.HasUnread = response["hasUnread"];
-                        chat.Type = (Models.Enum.ChatType)Enum.Parse(typeof(Models.Enum.ChatType), response["type"], true);
+                        chat.Type = response["type"];
                         chats.Add(chat);
                     }
                 }
                 return Task.FromResult(chats);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return Task.FromResult(new List<Models.ChatModel>());
             }
         }
 
         /// <summary>
-        /// This method get the authentication code from the qr code.
+        /// This method find a chat by id.
         /// </summary>
-        /// <returns>Returns STRING with authentication information.</returns>
-        public Task<string> GetAuthCode()
+        /// <param name="chat">Inform the chat.</param>
+        /// <returns>Returns the Models.ChatModel object</returns>
+        public Task<Models.ChatModel> ChatFind(string chat)
         {
             try
             {
-                dynamic response = js.ExecuteReturnObj(Driver, "return await WPP.conn.getAuthCode()");
-                return Task.FromResult(response["fullCode"]);
+                Models.ChatModel chatModel = new Models.ChatModel();
+                dynamic response = js.ExecuteReturnObj(Driver, string.Format("return await WPP.chatFind('{0}')", chat));
+                if(response != null)
+                {
+                    Functions func = new Functions();
+                    //Contact
+                    chatModel.Id = response["contact"]["id"];
+                    chatModel.Server = response["contact"]["server"];
+                    chatModel.Name = response["contact"]["name"];
+                    chatModel.PushName = response["contact"]["pushname"];
+                    chatModel.Image = response["contact"]["image"];
+                    chatModel.IsBroadcast = response["contact"]["isBroadcast"];
+                    chatModel.IsBusiness = response["contact"]["isBusiness"];
+                    chatModel.IsGroup = response["contact"]["isGroup"];
+                    chatModel.IsMe = response["contact"]["isMe"];
+                    chatModel.IsContact = response["contact"]["isMyContact"];
+                    chatModel.IsUser = response["contact"]["isUser"];
+                    chatModel.IsWAContact = response["contact"]["isWAContact"];
+
+                    //Messages
+                    chatModel.LastMessage = response["lastMessage"]["_serialized"];
+
+                    List<Models.MessageModels> messages = new List<Models.MessageModels>();
+                    foreach (var item in response["messages"])
+                    {
+                        Models.MessageModels message = new Models.MessageModels();
+                        message.Id = item["id"]["_serialized"];
+                        message.FromMe = item["id"]["fromMe"];
+                        message.Message = func.IsSet(item, "body") ? item["body"] : "";
+                        message.Type = item["type"];
+                        message.Sender = item["from"]["user"];
+                        message.Recipient = item["to"]["user"];
+                        messages.Add(message);
+                    }
+                    chatModel.Messages = messages;
+
+                    //Others
+                    chatModel.HasUnread = response["hasUnread"];
+                    chatModel.Type = response["type"];
+                }
+                return Task.FromResult(chatModel);
             }
             catch (Exception)
             {
-                return Task.FromResult("");
+                return Task.FromResult(new Models.ChatModel());
             }
         }
 
         /// <summary>
-        /// This method reloads the authentication code from the qr code.
+        /// This method mark a chat to composing state and keep sending "is writting a message".
         /// </summary>
-        /// <returns>Returns STRING with authentication information.</returns>
-        public Task<string> GetAuthCodeRefresh()
+        /// <param name="chat">Inform the chat.</param>
+        /// <param name="time">Enter milliseconds or leave empty.</param>
+        /// <returns>Return True or False</returns>
+        public bool MarkIsComposing(string chat, int time = 0)
         {
             try
             {
-                dynamic response = js.ExecuteReturnObj(Driver, "return await WPP.conn.refreshQR()");
-                return Task.FromResult(response["fullCode"]);
+                var timer = time > 0 ? ", " + time : "";
+                js.Execute(Driver, string.Format("return await WPP.chat.markIsComposing('{0}'{1})", chat, timer));
+                return true;
             }
             catch (Exception)
             {
-                return Task.FromResult("");
+                return false;
             }
         }
 
         /// <summary>
-        /// This method marks the chat as viewed messages.
+        /// This method mark a chat is paused state.
         /// </summary>
-        /// <param name="chat">Inform the chat you want to set as read.</param>
+        /// <param name="chat">Inform the chat.</param>
+        /// <returns>Return True or False</returns>
+        public bool MarkIsPaused(string chat)
+        {
+            try
+            {
+                js.Execute(Driver, string.Format("return await WPP.chat.markIsPaused('{0}')", chat));
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// This method mark a chat as read and send SEEN event.
+        /// </summary>
+        /// <param name="chat">Inform the chat.</param>
         /// <returns>Return True or False</returns>
         public bool MarkIsRead(string chat)
         {
             try
             {
-                js.Execute(Driver, string.Format("return WPP.chat.markIsRead('{0}')", chat));
+                js.Execute(Driver, string.Format("return await WPP.chat.markIsRead('{0}')", chat));
                 return true;
             }
             catch (Exception)
@@ -584,13 +867,18 @@ namespace WPP4DotNet
             }
         }
 
-        public bool Logout()
+        /// <summary>
+        /// This method mark a chat to recording state and keep sending "is recording".
+        /// </summary>
+        /// <param name="chat">Inform the chat.</param>
+        /// <param name="time">Enter milliseconds or leave empty.</param>
+        /// <returns>Return True or False</returns>
+        public bool MarkIsRecording(string chat, int time = 0)
         {
             try
             {
-                js.Execute(Driver, "return WPP.conn.logout()");
-                Thread.Sleep(1000);
-                Finish();
+                var timer = time > 0 ? ", " + time : "";
+                js.Execute(Driver, string.Format("return await WPP.chat.markIsRecording('{0}'{1})", chat, timer));
                 return true;
             }
             catch (Exception)
@@ -598,29 +886,887 @@ namespace WPP4DotNet
                 return false;
             }
         }
+
         /// <summary>
-        /// This method disconnects whatsapp web and ends the session.
+        /// This method mark a chat as unread.
         /// </summary>
+        /// <param name="chat">Inform the chat.</param>
         /// <returns>Return True or False</returns>
-        public bool GetWppJS()
+        public bool MarkIsUnread(string chat)
         {
             try
             {
-                GitHub github = new GitHub();
-                github.CheckUpdate(WppPath);
-                string path = string.IsNullOrEmpty(WppPath) ? Path.Combine(Environment.CurrentDirectory, "WppConnect") : WppPath;
-                string file = Path.Combine(path, "wppconnect-wa.js");
-                if (File.Exists(file))
+                js.Execute(Driver, string.Format("return await WPP.chat.markIsUnread('{0}')", chat));
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// This method mute a chat, you can use duration.
+        /// </summary>
+        /// <param name="chat">Inform the chat.</param>
+        /// <param name="time">Inform the seconds.</param>
+        /// <returns>Return True or False</returns>
+        public bool Mute(string chat, int time = 0)
+        {
+            try
+            {
+                js.Execute(Driver, string.Format("return await WPP.chat.mute('{0}',{duration: {1}})", chat, time));
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// This method mute a chat, you can use expiration.
+        /// </summary>
+        /// <param name="chat">Inform the chat.</param>
+        /// <param name="date">Inform the DateTime.</param>
+        /// <returns>Return True or False</returns>
+        public bool Mute(string chat, DateTime date)
+        {
+            try
+            {
+                js.Execute(Driver, string.Format("return await WPP.chat.mute('{0}',{expiration: {1}})", chat, date));
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// This method unmute a chat.
+        /// </summary>
+        /// <param name="chat">Inform the chat.</param>
+        /// <returns>Return True or False</returns>
+        public bool UnMute(string chat)
+        {
+            try
+            {
+                js.Execute(Driver, string.Format("return await WPP.chat.unmute('{0}')", chat));
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// This method open the chat in the WhatsApp interface in a specific message.
+        /// </summary>
+        /// <param name="chat">Inform the chat.</param>
+        /// <param name="messageID">Inform the message ID.</param>
+        /// <returns></returns>
+        public bool OpenChatAt(string chat, string messageID)
+        {
+            try
+            {
+                js.Execute(Driver, string.Format("return await WPP.chat.openChatAt('{0}','{1}')", chat, messageID));
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// This method open the chat in the WhatsApp interface in bottom position.
+        /// </summary>
+        /// <param name="chat">Inform the chat.</param>
+        /// <returns></returns>
+        public bool OpenChatBottom(string chat, string messageID)
+        {
+            try
+            {
+                js.Execute(Driver, string.Format("return await WPP.chat.openChatBottom('{0}')", chat));
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// This method open the chat in the WhatsApp interface from first unread message.
+        /// </summary>
+        /// <param name="chat">Inform the chat.</param>
+        /// <returns></returns>
+        public bool OpenChatFromUnread(string chat, string messageID)
+        {
+            try
+            {
+                js.Execute(Driver, string.Format("return await WPP.chat.openChatFromUnread('{0}')", chat));
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// This method pin the chat.
+        /// </summary>
+        /// <param name="chat">Inform the chat.</param>
+        /// <param name="status">Inform true or false.</param>
+        /// <returns>Return True or False</returns>
+        public bool Pin(string chat, bool status)
+        {
+            try
+            {
+                js.Execute(Driver, string.Format("return await WPP.chat.pin('{0}'{1})", chat, status));
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+        #endregion
+
+        #region WPPJS CHAT - Message Functions
+        /// <summary>
+        /// This method send a text message.
+        /// </summary>
+        /// <param name="chat">Inform the chat.</param>
+        /// <param name="message">Inform the Message.</param>
+        /// <param name="simulateTyping">Inform true or false.</param>
+        /// <returns>Returns the Models.SendReturnModels object</returns>
+        public async Task<Models.SendReturnModels> SendMessage(string chat, string message, bool simulateTyping=false)
+        {
+            try
+            {
+                Models.SendReturnModels ret = new Models.SendReturnModels();
+                if (simulateTyping)
                 {
-                    using (StreamReader sr = new StreamReader(file))
+                    MarkIsComposing(chat, 5000);
+                }
+                dynamic response = js.ExecuteReturnObj(Driver, string.Format("return await WPP.chat.sendTextMessage('{0}','{1}')", chat, message));
+                if (!string.IsNullOrEmpty(response["id"]))
+                {
+                    ret.Id = response["id"];
+                    ret.Sender = await GetMyNumber();
+                    ret.Recipient = chat;
+                    ret.Status = true;
+                }
+                else
+                {
+                    ret.Status = false;
+                    ret.Error = "Error trying to send message.";
+                }
+                return ret;
+            }
+            catch (Exception ex)
+            {
+                Models.SendReturnModels ret = new Models.SendReturnModels();
+                ret.Error = ex.Message;
+                ret.Status = false;
+                return ret;
+            }
+        }
+
+        /// <summary>
+        /// This method send a create poll message (Note: This only works for groups).
+        /// </summary>
+        /// <param name="chat">Inform the chat.</param>
+        /// <param name="name">Inform the Name.</param>
+        /// <param name="choices">Inform the Choices.</param>
+        /// <param name="options">Inform the Options List.</param>
+        /// <param name="simulateTyping">Inform true or false.</param>
+        /// <returns>Returns the Models.SendReturnModels object</returns>
+        public async Task<Models.SendReturnModels> SendCreatePollMessage(string chat, string name, string choices, List<string> options, bool simulateTyping = false)
+        {
+            try
+            {
+                Models.SendReturnModels ret = new Models.SendReturnModels();
+                if (simulateTyping)
+                {
+                    MarkIsComposing(chat, 5000);
+                }
+                var option = "";
+                foreach (var item in options)
+                {
+                    option += string.Format(",'{0}'", item);
+                }
+                dynamic response = js.ExecuteReturnObj(Driver, string.Format("return await WPP.chat.sendCreatePollMessage('{0}','{1}','{2}',[{3}])", chat, name, choices, option.TrimStart(',')));
+                if (!string.IsNullOrEmpty(response["id"]))
+                {
+                    ret.Id = response["id"];
+                    ret.Sender = await GetMyNumber();
+                    ret.Recipient = chat;
+                    ret.Status = true;
+                }
+                else
+                {
+                    ret.Status = false;
+                    ret.Error = "Error trying to send message.";
+                }
+                return ret;
+            }
+            catch (Exception ex)
+            {
+                Models.SendReturnModels ret = new Models.SendReturnModels();
+                ret.Error = ex.Message;
+                ret.Status = false;
+                return ret;
+            }
+        }
+
+        /// <summary>
+        /// This method send a file message, that can be an audio, document, image, sticker or video.
+        /// </summary>
+        /// <param name="chat">Inform the chat.</param>
+        /// <param name="content">Inform the content.</param>
+        /// <param name="options">Inform the Options List.</param>
+        /// <param name="simulateTyping">Inform true or false.</param>
+        /// <returns>Returns the Models.SendReturnModels object</returns>
+        public async Task<Models.SendReturnModels> SendFileMessage(string chat, string content, List<string> options, bool simulateTyping = false)
+        {
+            try
+            {
+                Models.SendReturnModels ret = new Models.SendReturnModels();
+                if (simulateTyping)
+                {
+                    MarkIsComposing(chat, 5000);
+                }
+                var option = "";
+                foreach (var item in options)
+                {
+                    option += string.Format(",{0}", item);
+                }
+                option = "{"+ option.TrimStart(',') + "}";
+                var str = string.Format("return await WPP.chat.sendFileMessage('{0}','{1}',{2})", chat, content, option);
+                dynamic response = js.ExecuteReturnObj(Driver, str);
+                if (!string.IsNullOrEmpty(response["id"]))
+                {
+                    ret.Id = response["id"];
+                    ret.Sender = await GetMyNumber();
+                    ret.Recipient = chat;
+                    ret.Status = true;
+                }
+                else
+                {
+                    ret.Status = false;
+                    ret.Error = "Error trying to send message.";
+                }
+                return ret;
+            }
+            catch (Exception ex)
+            {
+                Models.SendReturnModels ret = new Models.SendReturnModels();
+                ret.Error = ex.Message;
+                ret.Status = false;
+                return ret;
+            }
+        }
+
+        /// <summary>
+        /// This method send a list message options.
+        /// </summary>
+        /// <param name="chat">Inform the chat.</param>
+        /// <param name="options">Inform the Options List.</param>
+        /// <param name="simulateTyping">Inform true or false.</param>
+        /// <returns>Returns the Models.SendReturnModels object</returns>
+        public async Task<Models.SendReturnModels> SendListMessage(string chat,  List<string> options, bool simulateTyping = false)
+        {
+            try
+            {
+                Models.SendReturnModels ret = new Models.SendReturnModels();
+                if (simulateTyping)
+                {
+                    MarkIsComposing(chat, 5000);
+                }
+                var option = "";
+                foreach (var item in options)
+                {
+                    option += string.Format(",{0}", item);
+                }
+                option = "{" + option.TrimStart(',') + "}";
+                dynamic response = js.ExecuteReturnObj(Driver, string.Format("return await WPP.chat.sendListMessage('{0}',{1})", chat, option));
+                if (!string.IsNullOrEmpty(response["id"]))
+                {
+                    ret.Id = response["id"];
+                    ret.Sender = await GetMyNumber();
+                    ret.Recipient = chat;
+                    ret.Status = true;
+                }
+                else
+                {
+                    ret.Status = false;
+                    ret.Error = "Error trying to send message.";
+                }
+                return ret;
+            }
+            catch (Exception ex)
+            {
+                Models.SendReturnModels ret = new Models.SendReturnModels();
+                ret.Error = ex.Message;
+                ret.Status = false;
+                return ret;
+            }
+        }
+
+        /// <summary>
+        /// This method send a location message.
+        /// </summary>
+        /// <param name="chat">Inform the chat.</param>
+        /// <param name="options">Inform the Options List.</param>
+        /// <param name="simulateTyping">Inform true or false.</param>
+        /// <returns>Returns the Models.SendReturnModels object</returns>
+        public async Task<Models.SendReturnModels> SendLocationMessage(string chat, List<string> options, bool simulateTyping = false)
+        {
+            try
+            {
+                Models.SendReturnModels ret = new Models.SendReturnModels();
+                if (simulateTyping)
+                {
+                    MarkIsComposing(chat, 5000);
+                }
+                var option = "";
+                foreach (var item in options)
+                {
+                    option += string.Format(",{0}", item);
+                }
+                option = "{" + option.TrimStart(',') + "}";
+                dynamic response = js.ExecuteReturnObj(Driver, string.Format("return await WPP.chat.sendLocationMessage('{0}',{1})", chat, option));
+                if (!string.IsNullOrEmpty(response["id"]))
+                {
+                    ret.Id = response["id"];
+                    ret.Sender = await GetMyNumber();
+                    ret.Recipient = chat;
+                    ret.Status = true;
+                }
+                else
+                {
+                    ret.Status = false;
+                    ret.Error = "Error trying to send message.";
+                }
+                return ret;
+            }
+            catch (Exception ex)
+            {
+                Models.SendReturnModels ret = new Models.SendReturnModels();
+                ret.Error = ex.Message;
+                ret.Status = false;
+                return ret;
+            }
+        }
+
+        /// <summary>
+        /// This method send a raw message.
+        /// </summary>
+        /// <param name="chat">Inform the chat.</param>
+        /// <param name="rawMessage">Inform the raw message.</param>
+        /// <param name="options">Inform the Options List.</param>
+        /// <param name="simulateTyping">Inform true or false.</param>
+        /// <returns>Returns the Models.SendReturnModels object</returns>
+        public async Task<Models.SendReturnModels> SendRawMessage(string chat, string rawMessage, List<string> options, bool simulateTyping = false)
+        {
+            try
+            {
+                Models.SendReturnModels ret = new Models.SendReturnModels();
+                if (simulateTyping)
+                {
+                    MarkIsComposing(chat, 5000);
+                }
+                var option = "";
+                if(options != null)
+                {
+                    foreach (var item in options)
                     {
-                        string wppjs = sr.ReadToEnd();
-                        js.Execute(Driver, wppjs);
-                        js.Execute(Driver, CustomJS());
-                        return true;
+                        option += string.Format(",{0}", item);
+                    }
+                    option = ",{" + option.TrimStart(',') + "}";
+                }
+                dynamic response = js.ExecuteReturnObj(Driver, string.Format("return await WPP.chat.sendRawMessage('{0}','{1}'{2})", chat, rawMessage, option));
+                if (!string.IsNullOrEmpty(response["id"]))
+                {
+                    ret.Id = response["id"];
+                    ret.Sender = await GetMyNumber();
+                    ret.Recipient = chat;
+                    ret.Status = true;
+                }
+                else
+                {
+                    ret.Status = false;
+                    ret.Error = "Error trying to send message.";
+                }
+                return ret;
+            }
+            catch (Exception ex)
+            {
+                Models.SendReturnModels ret = new Models.SendReturnModels();
+                ret.Error = ex.Message;
+                ret.Status = false;
+                return ret;
+            }
+        }
+
+        /// <summary>
+        /// This method send a reaction to a message.
+        /// </summary>
+        /// <param name="messageId">Inform the message ID.</param>
+        /// <param name="reaction">Inform the reaction.</param>
+        /// <returns>Return True or False</returns>
+        public Task<string> SendReactionMessage(string messageId, string reaction)
+        {
+            try
+            {
+                dynamic response = js.ExecuteReturnObj(Driver, string.Format("return await WPP.chat.sendReactionMessage('{0}','{1}')", messageId, reaction));
+                return Task.FromResult(response["sendMsgResult"]);
+            }
+            catch (Exception)
+            {
+                return Task.FromResult("");
+            }
+        }
+
+        /// <summary>
+        /// This method send a file message, that can be an audio, document, image, sticker or video.
+        /// </summary>
+        /// <param name="chat">Inform the chat.</param>
+        /// <param name="contacts">Inform the contacts.</param>
+        /// <param name="options">Inform the Options List.</param>
+        /// <param name="simulateTyping">Inform true or false.</param>
+        /// <returns>Returns the Models.SendReturnModels object</returns>
+        public async Task<Models.SendReturnModels> SendVCardContactMessage(string chat, List<string> contacts, List<string> options, bool simulateTyping = false)
+        {
+            try
+            {
+                Models.SendReturnModels ret = new Models.SendReturnModels();
+                if (simulateTyping)
+                {
+                    MarkIsComposing(chat, 5000);
+                }
+                var contact = "";
+                foreach (var item in contacts)
+                {
+                    contact += string.Format(",'{0}'", item);
+                }
+                var option = "";
+                if (options != null)
+                {
+                    foreach (var item in options)
+                    {
+                        option += string.Format(",'{0}'", item);
+                    }
+                    option = ",{" + option.TrimStart(',') + "}";
+                }
+                dynamic response = js.ExecuteReturnObj(Driver, string.Format("return await WPP.chat.sendVCardContactMessage('{0}',[{1}]{2})", chat, contact, option));
+                if (!string.IsNullOrEmpty(response["id"]))
+                {
+                    ret.Id = response["id"];
+                    ret.Sender = await GetMyNumber();
+                    ret.Recipient = chat;
+                    ret.Status = true;
+                }
+                else
+                {
+                    ret.Status = false;
+                    ret.Error = "Error trying to send message.";
+                }
+                return ret;
+            }
+            catch (Exception ex)
+            {
+                Models.SendReturnModels ret = new Models.SendReturnModels();
+                ret.Error = ex.Message;
+                ret.Status = false;
+                return ret;
+            }
+        }
+
+        /// <summary>
+        /// This method send a reaction to a message.
+        /// </summary>
+        /// <param name="messageId">Inform the message ID.</param>
+        /// <param name="reaction">Inform the false to remove.</param>
+        /// <returns>Return True or False</returns>
+        public Task<string> SendReactionMessage(string messageId, bool reaction)
+        {
+            try
+            {
+                dynamic response = js.ExecuteReturnObj(Driver, string.Format("return await WPP.chat.sendReactionMessage('{0}','{1}')", messageId, reaction));
+                return Task.FromResult(response["sendMsgResult"]);
+            }
+            catch (Exception)
+            {
+                return Task.FromResult("");
+            }
+        }
+
+        /// <summary>
+        /// This method star/unstar a message.
+        /// </summary>
+        /// <param name="messageId">Inform the message ID.</param>
+        /// <param name="star">Inform true or false</param>
+        /// <returns>Return True or False</returns>
+        public Task<bool> StarMessage(string messageId, bool star = false)
+        {
+            try
+            {
+                js.Execute(Driver, string.Format("return await WPP.chat.starMessage('{0}',{1})", messageId, star));
+                return Task.FromResult(true);
+            }
+            catch (Exception)
+            {
+                return Task.FromResult(false);
+            }
+        }
+
+        /// <summary>
+        /// This method delete message in chat.
+        /// </summary>
+        /// <param name="chat">Inform the chat.</param>
+        /// <param name="message">Inform the message ID list.</param>
+        /// <param name="deleteMedia">Inform true or false</param>
+        /// <param name="revoke">Inform true or false</param>
+        /// <returns>Return True or False</returns>
+        public Task<bool> DeleteMessage(string chat, List<string> message, bool deleteMedia=false, bool revoke=false)
+        {
+            try
+            {
+                var msgID = "";
+                foreach (var item in message)
+                {
+                    msgID += string.Format(",'{0}'", item);
+                }
+                var deleteMediaString = "";
+                if (deleteMedia)
+                {
+                    deleteMediaString = ", true";
+                }
+                var revokeString = "";
+                if (revoke)
+                {
+                    revokeString = ", true";
+                }
+                js.Execute(Driver, string.Format("return await WPP.chat.deleteMessage('{0}',[{1}]{2}{3})", chat, msgID.TrimStart(','), deleteMediaString, revokeString));
+                return Task.FromResult(true);
+            }
+            catch (Exception)
+            {
+                return Task.FromResult(false);
+            }
+        }
+
+        /// <summary>
+        /// This method download the blob of a media message.
+        /// </summary>
+        /// <param name="message">Inform the message ID.</param>
+        /// <returns>Return String Blob</returns>
+        public Task<string> DownloadMedia(string message)
+        {
+            try
+            {
+                return Task.FromResult(js.ExecuteReturnString(Driver, string.Format("return await WPP.chat.downloadMedia('{0}')", message)));
+            }
+            catch (Exception)
+            {
+                return Task.FromResult("");
+            }
+        }
+
+        /// <summary>
+        /// This method generate message id.
+        /// </summary>
+        /// <param name="chat">Inform the chat.</param>
+        /// <returns>Return String</returns>
+        public Task<string> GenerateMessageID(string chat)
+        {
+            try
+            {
+                dynamic response = js.ExecuteReturnObj(Driver, string.Format("return await WPP.chat.generateMessageID('{0}')", chat));
+                return Task.FromResult(response["_serialized"]);
+            }
+            catch (Exception)
+            {
+                return Task.FromResult("");
+            }
+        }
+
+        /// <summary>
+        /// This method get message by a single ID.
+        /// </summary>
+        /// <param name="message">Inform the message ID.</param>
+        /// <returns>Return Models.MessageModels Object</returns>
+        public Task<Models.MessageModels> GetMessageById(string message)
+        {
+            try
+            {
+                Models.MessageModels msg = new Models.MessageModels();
+                dynamic response = js.ExecuteReturnObj(Driver, string.Format("return await WPP.chat.getMessageById('{0}')", message));
+                if (response != null)
+                {
+                    Functions func = new Functions();
+                    msg.Id = response["id"]["_serialized"];
+                    msg.FromMe = response["id"]["fromMe"];
+                    msg.Message = func.IsSet(response, "body") ? response["body"] : "";
+                    msg.Type = response["type"];
+                    msg.Sender = response["from"]["user"];
+                    msg.Recipient = response["to"]["user"];
+                }
+                return Task.FromResult(msg);
+            }
+            catch (Exception)
+            {
+                return Task.FromResult(new Models.MessageModels());
+            }
+        }
+
+        /// <summary>
+        /// This method fetch messages from a chat.
+        /// </summary>
+        /// <param name="chat">Inform the chat.</param>
+        /// <param name="count">Inform the count.</param>
+        /// <param name="onlyUnread">Inform the onlyUnread true or false.</param>
+        /// <returns>Return List Models.MessageModels Object</returns>
+        public Task<List<Models.MessageModels>> GetMessages(string chat, int count=20, bool onlyUnread=false)
+        {
+            try
+            {
+                var onlyUnreadString = "";
+                if (onlyUnread)
+                {
+                    onlyUnreadString = ", onlyUnread: true";
+                }
+                List<Models.MessageModels> messages = new List<Models.MessageModels>();
+                IReadOnlyCollection<object> response = js.ExecuteReturnListObj(Driver, string.Format("return await WPP.chat.getMessages('{0}', {count:{1}{2}})", chat, count, onlyUnreadString));
+                if (response != null)
+                {
+                    Functions func = new Functions();
+                    foreach (dynamic item in response)
+                    {
+                        Models.MessageModels msg = new Models.MessageModels();
+                        msg.Id = item["id"]["_serialized"];
+                        msg.FromMe = item["id"]["fromMe"];
+                        msg.Message = func.IsSet(item, "body") ? item["body"] : "";
+                        msg.Type = item["type"];
+                        msg.Sender = item["from"]["user"];
+                        msg.Recipient = item["to"]["user"];
+                        messages.Add(msg);
                     }
                 }
-                return false;
+                return Task.FromResult(messages);
+            }
+            catch (Exception)
+            {
+                return Task.FromResult(new List<Models.MessageModels>());
+            }
+        }
+        #endregion
+
+        #region WPPJS CONTACT - Functions
+        /// <summary>
+        /// This method get profile picture.
+        /// </summary>
+        /// <param name="chat">Inform the chat.</param>
+        /// <returns>Return String Url</returns>
+        public Task<string> ContactGetProfilePictureUrl(string chat)
+        {
+            try
+            {
+                return Task.FromResult(js.ExecuteReturnString(Driver, string.Format("return await WPP.contact.getProfilePictureUrl('{0}')", chat)));
+            }
+            catch (Exception)
+            {
+                return Task.FromResult("");
+            }
+        }
+
+        /// <summary>
+        /// This method get status.
+        /// </summary>
+        /// <param name="chat">Inform the chat.</param>
+        /// <returns>Return String Status</returns>
+        public Task<string> ContactGetStatus(string chat)
+        {
+            try
+            {
+                dynamic response = js.ExecuteReturnObj(Driver, string.Format("return await WPP.contact.getStatus('{0}')", chat));
+                return Task.FromResult(response["status"]);
+            }
+            catch (Exception)
+            {
+                return Task.FromResult("");
+            }
+        }
+
+        /// <summary>
+        /// This method check contact exist.
+        /// </summary>
+        /// <param name="chat">Inform the chat.</param>
+        /// <returns>Return True or False</returns>
+        public Task<bool> ContactExists(string chat)
+        {
+            try
+            {
+                dynamic response = js.ExecuteReturnObj(Driver, string.Format("return await WPP.contact.queryExists('{0}')", chat));
+                return Task.FromResult(response==null?false:true);
+            }
+            catch (Exception)
+            {
+                return Task.FromResult(false);
+            }
+        }
+
+        /// <summary>
+        /// This method searches all contacts and can be filtered by my and label.
+        /// </summary>
+        /// <param name="filter">Use "my" or "label" to filter or leave blank to bring everything.</param>
+        /// <param name="value">Enter an array of strings to filter the desired label.</param>
+        /// <returns>Returns the List Models.ChatModel object</returns>
+        public Task<List<Models.ChatModel>> ContactList(string filter = "", List<string> value = null)
+        {
+            try
+            {
+                var label = "";
+                if (value != null && filter == "label")
+                {
+                    foreach (var item in value)
+                    {
+                        label += string.Format(",'{0}'", item);
+                    }
+                    label = string.Format(",[{0}]", label.TrimStart(','));
+                }
+                IReadOnlyCollection<object> obj;
+                switch (filter)
+                {
+                    case "my":
+                    case "label":
+                        obj = js.ExecuteReturnListObj(Driver, string.Format("return await WPP.contactList('{0}'{1})", filter, label));
+                        break;
+                    default:
+                        obj = js.ExecuteReturnListObj(Driver, "return await WPP.contactList()");
+                        break;
+                }
+                List<Models.ChatModel> chats = new List<Models.ChatModel>();
+                if (obj != null)
+                {
+                    Functions func = new Functions();
+                    foreach (dynamic response in obj)
+                    {
+                        Models.ChatModel chat = new Models.ChatModel();
+                        //Contact
+                        chat.Id = response["id"];
+                        chat.Server = response["server"];
+                        chat.Name = response["name"];
+                        chat.PushName = response["pushname"];
+                        chat.Image = response["image"];
+                        chat.IsBroadcast = response["isBroadcast"];
+                        chat.IsBusiness = response["isBusiness"];
+                        chat.IsGroup = response["isGroup"];
+                        chat.IsMe = response["isMe"];
+                        chat.IsContact = response["isMyContact"];
+                        chat.IsUser = response["isUser"];
+                        chat.IsWAContact = response["isWAContact"];
+                        chats.Add(chat);
+                    }
+                }
+                return Task.FromResult(chats);
+            }
+            catch (Exception)
+            {
+                return Task.FromResult(new List<Models.ChatModel>());
+            }
+        }
+        #endregion
+
+        #region WPPJS GROUP - Functions
+        /// <summary>
+        /// This method get information from invite code.
+        /// </summary>
+        /// <param name="code">Inform the invite code.</param>
+        /// <returns>Return Models.GroupInfoModels Object</returns>
+        public Task<Models.GroupInfoModels> GroupGetInfoFromInviteCode(string code)
+        {
+            try
+            {
+                Models.GroupInfoModels info = new Models.GroupInfoModels();
+                List<Models.ParticipantsModels> participants = new List<Models.ParticipantsModels>();
+                dynamic response = js.ExecuteReturnObj(Driver, string.Format("return await WPP.group.getGroupInfoFromInviteCode('{0}')",code));
+                foreach (var item in response["participants"])
+                {
+                    Models.ParticipantsModels participant = new Models.ParticipantsModels();
+                    participant.Id = item["id"];
+                    participant.IsAdmin = item["isAdmin"];
+                    participant.IsSuperAdmin = item["isSuperAdmin"];
+                    participants.Add(participant);
+                }
+                if (response != null)
+                {
+                    info.Id = response["id"];
+                    info.Announce = response["announce"];
+                    info.Creation = DateTimeOffset.FromUnixTimeSeconds(response["creation"]).DateTime;
+                    info.DefaultSubgroup = response["defaultSubgroup"];
+                    info.Desc = response["desc"];
+                    info.DescID = response["descId"];
+                    info.DescOwner = response["descOwner"];
+                    info.DescTime = DateTimeOffset.FromUnixTimeSeconds(response["descTime"]).DateTime;
+                    info.IsParentGroup = response["isParentGroup"];
+                    info.NoFrequentlyForwarded = response["noFrequentlyForwarded"];
+                    info.NumSubgroups = response["numSubgroups"];
+                    info.Owner = response["owner"];
+                    info.Participants = participants;
+                    info.PvId = response["pvId"];
+                    info.Restrict = response["restrict"];
+                    info.Size = response["size"];
+                    info.Status = response["status"];
+                    info.Subject = response["subject"];
+                    info.SubjectOwner = response["subjectOwner"];
+                    info.SubjectTime = DateTimeOffset.FromUnixTimeSeconds(response["subjectTime"]).DateTime;
+                    info.Support = response["support"];
+                    info.Suspended = response["suspended"];
+                }
+                return Task.FromResult(info);
+            }
+            catch (Exception)
+            {
+                return Task.FromResult(new Models.GroupInfoModels());
+            }
+        }
+
+        /// <summary>
+        /// This method join group from invite code.
+        /// </summary>
+        /// <param name="code">Inform the invite code.</param>
+        /// <returns>Return String Chat ID</returns>
+        public Task<string> GroupJoin(string code)
+        {
+            try
+            {
+                dynamic response = js.ExecuteReturnObj(Driver, string.Format("return await WPP.group.join('{0}')", code));
+                return Task.FromResult(response["id"]);
+            }
+            catch (Exception)
+            {
+                return Task.FromResult("");
+            }
+        }
+
+        /// <summary>
+        /// This method leave from a group.
+        /// </summary>
+        /// <param name="chat">Inform the chat group ([number]@g.us).</param>
+        /// <returns>Return True or False</returns>
+        public bool GroupLeave(string chat)
+        {
+            try
+            {
+                js.Execute(Driver, string.Format("return await WPP.group.leave('{0}')", chat));
+                return true;
             }
             catch (Exception)
             {
@@ -629,14 +1775,563 @@ namespace WPP4DotNet
         }
 
         /// <summary>
-        /// This method customizes some calls to WPP JS generating new JS functions.
+        /// This method revoke the current invite code and generate new one.
         /// </summary>
-        /// <returns>Returns STRING from JS functions.</returns>
-        private string CustomJS()
+        /// <param name="chat">Inform the chat group ([number]@g.us).</param>
+        /// <returns>Return String URL</returns>
+        public Task<string> GroupRevokeInviteCode(string chat)
         {
-            string custom = "";
-            custom += "window.WPP.chatList=async function(d,e){let a=[];switch(d){case\"user\":a=await window.WPP.chat.list({onlyUsers:!0});break;case\"group\":a=await window.WPP.chat.list({onlyGroups:!0});break;case\"label\":a=await window.WPP.chat.list({withLabels:e});break;case\"unread\":a=await window.WPP.chat.list({onlyWithUnreadMessage:!0});break;default:a=await window.WPP.chat.list()}let c=[];for(let b=0;b<a.length;b++)if(a[b]){let f=await WPP.contact.getProfilePictureUrl(a[b].id.user),g={hasUnread:a[b].hasUnread,type:a[b].kind,messages:a[b].msgs._models,lastMessage:a[b].lastReceivedKey,contact:{id:a[b].id.user,server:a[b].id.server,name:a[b].formattedTitle,pushname:a[b].contact.pushname,isUser:a[b].isUser,isGroup:a[b].isGroup,isBroadcast:a[b].isBroadcast,isMe:a[b].contact.isMe,isBusiness:a[b].contact.isBusiness,isMyContact:a[b].contact.isMyContact,isWAContact:a[b].contact.isWAContact,image:f}};c.push(g)}return c}";
-            return custom;
+            try
+            {
+                var code = js.ExecuteReturnString(Driver, string.Format("return await WPP.group.revokeInviteCode('{0}')", chat));
+                return Task.FromResult(string.Format("https://chat.whatsapp.com/{0}", code));
+            }
+            catch (Exception)
+            {
+                return Task.FromResult("");
+            }
         }
+
+        /// <summary>
+        /// This method define the group description.
+        /// </summary>
+        /// <param name="chat">Inform the chat group ([number]@g.us).</param>
+        /// <param name="description">Inform the description.</param>
+        /// <returns>Return True or False</returns>
+        public Task<bool> GroupSetDescription(string chat, string description)
+        {
+            try
+            {
+                return Task.FromResult(js.ExecuteReturnBool(Driver, string.Format("return await WPP.group.setDescription('{0}','{1}')", chat, description)));
+            }
+            catch (Exception)
+            {
+                return Task.FromResult(false);
+            }
+        }
+
+        /// <summary>
+        /// This method set the group property (announcement and restrict).
+        /// </summary>
+        /// <param name="chat">Inform the chat group ([number]@g.us).</param>
+        /// <param name="property">Inform the property name</param>
+        /// <param name="value">Inform the value bool.</param>
+        /// <returns>Return True or False</returns>
+        public Task<bool> GroupSetProperty(string chat, string property, bool value)
+        {
+            try
+            {
+                return Task.FromResult(js.ExecuteReturnBool(Driver, string.Format("return await WPP.group.setProperty('{0}','{1}',{2})", chat, property, value)));
+            }
+            catch (Exception)
+            {
+                return Task.FromResult(false);
+            }
+        }
+
+        /// <summary>
+        /// This method set the group property (ephemeral).
+        /// </summary>
+        /// <param name="chat">Inform the chat group ([number]@g.us).</param>
+        /// <param name="property">Inform the property name</param>
+        /// <param name="value">Inform the value bool.</param>
+        /// <returns>Return True or False</returns>
+        public Task<bool> GroupSetProperty(string chat, string property, int value)
+        {
+            try
+            {
+                return Task.FromResult(js.ExecuteReturnBool(Driver, string.Format("return await WPP.group.setProperty('{0}','{1}',{2})", chat, property, value)));
+            }
+            catch (Exception)
+            {
+                return Task.FromResult(false);
+            }
+        }
+
+        /// <summary>
+        /// This method define the group subject.
+        /// </summary>
+        /// <param name="chat">Inform the chat group ([number]@g.us).</param>
+        /// <param name="subject">Inform the subject.</param>
+        /// <returns>Return True or False</returns>
+        public Task<bool> GroupSetSubject(string chat, string subject)
+        {
+            try
+            {
+                return Task.FromResult(js.ExecuteReturnBool(Driver, string.Format("return await WPP.group.setSubject('{0}','{1}')", chat, subject)));
+            }
+            catch (Exception)
+            {
+                return Task.FromResult(false);
+            }
+        }
+
+        /// <summary>
+        /// This method add participants in group.
+        /// </summary>
+        /// <param name="chat">Inform the chat group ([number]@g.us).</param>
+        /// <param name="participants">Inform the participants list.</param>
+        /// <returns>Return True or False</returns>
+        public bool GroupAddParticipants(string chat, List<string> participants)
+        {
+            try
+            {
+                var list = "";
+                foreach (var item in participants)
+                {
+                    list += string.Format(",'{0}'", item);
+                }
+                js.Execute(Driver, string.Format("return await WPP.group.setSubject('{0}',[{1}])", chat, list.TrimStart(',')));
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// This method check can add.
+        /// </summary>
+        /// <param name="chat">Inform the chat group ([number]@g.us).</param>
+        /// <returns>Return True or False</returns>
+        public Task<bool> GroupCanAdd(string chat)
+        {
+            try
+            {
+                return Task.FromResult(js.ExecuteReturnBool(Driver, string.Format("return await WPP.group.canAdd('{0}')", chat)));
+            }
+            catch (Exception)
+            {
+                return Task.FromResult(false);
+            }
+        }
+
+        /// <summary>
+        /// This method check can demote.
+        /// </summary>
+        /// <param name="chat">Inform the chat group ([number]@g.us).</param>
+        /// <param name="participant">Inform the chat participant.</param>
+        /// <returns>Return True or False</returns>
+        public Task<bool> GroupCanDemote(string chat, string participant)
+        {
+            try
+            {
+                return Task.FromResult(js.ExecuteReturnBool(Driver, string.Format("return await WPP.group.canDemote('{0}','{1}')", chat, participant)));
+            }
+            catch (Exception)
+            {
+                return Task.FromResult(false);
+            }
+        }
+
+        /// <summary>
+        /// This method check can promote.
+        /// </summary>
+        /// <param name="chat">Inform the chat group ([number]@g.us).</param>
+        /// <param name="participant">Inform the chat participant.</param>
+        /// <returns>Return True or False</returns>
+        public Task<bool> GroupCanPromote(string chat, string participant)
+        {
+            try
+            {
+                return Task.FromResult(js.ExecuteReturnBool(Driver, string.Format("return await WPP.group.canPromote('{0}','{1}')", chat, participant)));
+            }
+            catch (Exception)
+            {
+                return Task.FromResult(false);
+            }
+        }
+
+        /// <summary>
+        /// This method check can remove.
+        /// </summary>
+        /// <param name="chat">Inform the chat group ([number]@g.us).</param>
+        /// <param name="participant">Inform the chat participant.</param>
+        /// <returns>Return True or False</returns>
+        public Task<bool> GroupCanRemove(string chat, string participant)
+        {
+            try
+            {
+                return Task.FromResult(js.ExecuteReturnBool(Driver, string.Format("return await WPP.group.canRemove('{0}','{1}')", chat, participant)));
+            }
+            catch (Exception)
+            {
+                return Task.FromResult(false);
+            }
+        }
+
+        /// <summary>
+        /// This method create group.
+        /// </summary>
+        /// <param name="chat">Inform the chat group ([number]@g.us).</param>
+        /// <param name="participants">Inform the participants list.</param>
+        /// <returns>Return True or False</returns>
+        public bool GroupCreate(string chat, List<string> participants)
+        {
+            try
+            {
+                var list = "";
+                foreach (var item in participants)
+                {
+                    list += string.Format(",'{0}'", item);
+                }
+                js.Execute(Driver, string.Format("return await WPP.group.create('{0}',[{1}])", chat, list.TrimStart(',')));
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// This method demote participants.
+        /// </summary>
+        /// <param name="chat">Inform the chat group ([number]@g.us).</param>
+        /// <param name="participants">Inform the participants list.</param>
+        /// <returns>Return True or False</returns>
+        public bool GroupDemoteParticipants(string chat, List<string> participants)
+        {
+            try
+            {
+                var list = "";
+                foreach (var item in participants)
+                {
+                    list += string.Format(",'{0}'", item);
+                }
+                js.Execute(Driver, string.Format("return await WPP.group.demoteParticipants('{0}',[{1}])", chat, list.TrimStart(',')));
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// This method get the currend invite code of the group.
+        /// </summary>
+        /// <param name="chat">Inform the chat group ([number]@g.us).</param>
+        /// <returns>Return String URL</returns>
+        public Task<string> GroupGetInviteCode(string chat)
+        {
+            try
+            {
+                var code = js.ExecuteReturnString(Driver, string.Format("return await WPP.group.getInviteCode('{0}')", chat));
+                return Task.FromResult(string.Format("https://chat.whatsapp.com/{0}", code));
+            }
+            catch (Exception)
+            {
+                return Task.FromResult("");
+            }
+        }
+
+        /// <summary>
+        /// This method ensure group.
+        /// </summary>
+        /// <param name="chat">Inform the chat group ([number]@g.us).</param>
+        /// <param name="checkIsAdmin">Inform true or false.</param>
+        /// <returns>Return Models.MessageModels Object</returns>
+        public Task<List<Models.MessageModels>> GetMyStatus(string chat, bool checkIsAdmin)
+        {
+            try
+            {
+                List<Models.MessageModels> messages = new List<Models.MessageModels>();
+                dynamic response = js.ExecuteReturnObj(Driver, string.Format("return await WPP.group.ensureGroup('{0}',{1})", chat, checkIsAdmin));
+                if (response != null)
+                {
+                    Functions func = new Functions();
+                    foreach (var item in response["msgs"])
+                    {
+                        Models.MessageModels message = new Models.MessageModels();
+                        message.Id = item["id"]["_serialized"];
+                        message.FromMe = item["id"]["fromMe"];
+                        message.Message = func.IsSet(item, "body") ? item["body"] : "";
+                        message.Type = item["type"];
+                        message.Sender = item["from"]["user"];
+                        message.Recipient = item["to"]["user"];
+                        messages.Add(message);
+                    }
+                }
+                return Task.FromResult(messages);
+            }
+            catch (Exception)
+            {
+                return Task.FromResult(new List<Models.MessageModels>());
+            }
+        }
+
+        //----------------------------------------------
+        //Implementar [GROUP] ensureGroupAndParticipants
+        //----------------------------------------------
+
+        /// <summary>
+        /// This method get all participants.
+        /// </summary>
+        /// <param name="chat">Inform the chat group ([number]@g.us).</param>
+        /// <returns>Return Models.ParticipantsModels object</returns>
+        public Task<List<Models.ParticipantsModels>> GroupGetParticipants(string chat)
+        {
+            try
+            {
+                List<Models.ParticipantsModels> participants = new List<Models.ParticipantsModels>();
+                IReadOnlyCollection<object> obj = js.ExecuteReturnListObj(Driver, string.Format("return await WPP.group.getParticipants('{0}')", chat));
+                foreach (dynamic response in obj)
+                {
+                    Models.ParticipantsModels participant = new Models.ParticipantsModels();
+                    participant.Id = response["id"];
+                    participant.IsAdmin = response["isAdmin"];
+                    participant.IsSuperAdmin = response["isSuperAdmin"];
+                    participants.Add(participant);
+                }
+                return Task.FromResult(participants);                    
+            }
+            catch (Exception)
+            {
+                return Task.FromResult(new List<Models.ParticipantsModels>());
+            }
+        }
+
+        /// <summary>
+        /// This method check i am admin.
+        /// </summary>
+        /// <param name="chat">Inform the chat group ([number]@g.us).</param>
+        /// <returns>Return True or False</returns>
+        public Task<bool> GroupIAmAdmin(string chat)
+        {
+            try
+            {
+                return Task.FromResult(js.ExecuteReturnBool(Driver, string.Format("return await WPP.group.iAmAdmin('{0}')", chat)));
+            }
+            catch (Exception)
+            {
+                return Task.FromResult(false);
+            }
+        }
+
+        /// <summary>
+        /// This method check i am member.
+        /// </summary>
+        /// <param name="chat">Inform the chat group ([number]@g.us).</param>
+        /// <returns>Return True or False</returns>
+        public Task<bool> GroupIAmMember(string chat)
+        {
+            try
+            {
+                return Task.FromResult(js.ExecuteReturnBool(Driver, string.Format("return await WPP.group.iAmMember('{0}')", chat)));
+            }
+            catch (Exception)
+            {
+                return Task.FromResult(false);
+            }
+        }
+
+        /// <summary>
+        /// This method check i am restricted member.
+        /// </summary>
+        /// <param name="chat">Inform the chat group ([number]@g.us).</param>
+        /// <returns>Return True or False</returns>
+        public Task<bool> GroupIAmRestrictedMember(string chat)
+        {
+            try
+            {
+                return Task.FromResult(js.ExecuteReturnBool(Driver, string.Format("return await WPP.group.iAmRestrictedMember('{0}')", chat)));
+            }
+            catch (Exception)
+            {
+                return Task.FromResult(false);
+            }
+        }
+
+        /// <summary>
+        /// This method check i am super admin.
+        /// </summary>
+        /// <param name="chat">Inform the chat group ([number]@g.us).</param>
+        /// <returns>Return True or False</returns>
+        public Task<bool> GroupIAmSuperAdmin(string chat)
+        {
+            try
+            {
+                return Task.FromResult(js.ExecuteReturnBool(Driver, string.Format("return await WPP.group.iAmSuperAdmin('{0}')", chat)));
+            }
+            catch (Exception)
+            {
+                return Task.FromResult(false);
+            }
+        }
+
+        /// <summary>
+        /// This method promote participants.
+        /// </summary>
+        /// <param name="chat">Inform the chat group ([number]@g.us).</param>
+        /// <param name="participants">Inform the participants list.</param>
+        /// <returns>Return True or False</returns>
+        public bool GroupPromoteParticipants(string chat, List<string> participants)
+        {
+            try
+            {
+                var list = "";
+                foreach (var item in participants)
+                {
+                    list += string.Format(",'{0}'", item);
+                }
+                js.Execute(Driver, string.Format("return await WPP.group.promoteParticipants('{0}',[{1}])", chat, list.TrimStart(',')));
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// This method remove participants.
+        /// </summary>
+        /// <param name="chat">Inform the chat group ([number]@g.us).</param>
+        /// <param name="participants">Inform the participants list.</param>
+        /// <returns>Return True or False</returns>
+        public bool GroupRemoveParticipants(string chat, List<string> participants)
+        {
+            try
+            {
+                var list = "";
+                foreach (var item in participants)
+                {
+                    list += string.Format(",'{0}'", item);
+                }
+                js.Execute(Driver, string.Format("return await WPP.group.removeParticipants('{0}',[{1}])", chat, list.TrimStart(',')));
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+        #endregion
+
+        #region WPPJS LABELS - Functions
+
+        #endregion
+
+        #region WPPJS PROFILE - Functions
+
+        #endregion
+
+        #region WPPJS STATUS - Functions
+        /// <summary>
+        /// This method get my status messages.
+        /// </summary>
+        /// <returns>Return Models.MessageModels Object</returns>
+        public Task<List<Models.MessageModels>> GetMyStatus()
+        {
+            try
+            {
+                List<Models.MessageModels> messages = new List<Models.MessageModels>();
+                dynamic response = js.ExecuteReturnObj(Driver, string.Format("return await WPP.status.getMyStatus()"));
+                if (response != null)
+                {
+                    Functions func = new Functions();
+                    foreach (var item in response["msgs"])
+                    {
+                        Models.MessageModels message = new Models.MessageModels();
+                        message.Id = item["id"]["_serialized"];
+                        message.FromMe = item["id"]["fromMe"];
+                        message.Message = func.IsSet(item, "body") ? item["body"] : "";
+                        message.Type = item["type"];
+                        message.Sender = item["from"]["user"];
+                        message.Recipient = item["to"]["user"];
+                        messages.Add(message);
+                    }
+                }
+                return Task.FromResult(messages);
+            }
+            catch (Exception)
+            {
+                return Task.FromResult(new List<Models.MessageModels>());
+            }
+        }
+        #endregion
+
+        #region WPPJS BLOCKLIST - Functions
+        /// <summary>
+        /// This method returns a list of blocked contacts.
+        /// </summary>
+        /// <returns>Return String List.</returns>
+        public Task<List<string>> BlockList()
+        {
+            try
+            {
+                IReadOnlyCollection<object> obj = js.ExecuteReturnListObj(Driver, "return await WPP.blocklist.all()");
+                List<string> chats = new List<string>();
+                if (obj != null)
+                {
+                    Functions func = new Functions();
+                    foreach (dynamic response in obj)
+                    {
+                        chats.Add(String.Format("{0},{1},{2}", response["server"], response["user"], response["_serialized"]));
+                    }
+                }
+                return Task.FromResult(chats);
+            }
+            catch (Exception)
+            {
+                return Task.FromResult(new List<string>());
+            }
+        }
+
+        /// <summary>
+        /// This method block a contact.
+        /// </summary>
+        /// <param name="chat">Inform the chat.</param>
+        /// <returns>Return True or False</returns>
+        public bool BlockContact(string chat)
+        {
+            try
+            {
+                js.Execute(Driver, string.Format("return await WPP.blocklist.blockContact('{0}')", chat));
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// This method unblock a contact.
+        /// </summary>
+        /// <param name="chat">Inform the chat.</param>
+        /// <returns>Return True or False</returns>
+        public bool UnBlockContact(string chat)
+        {
+            try
+            {
+                js.Execute(Driver, string.Format("return await WPP.blocklist.unblockContact('{0}')", chat));
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// This method check if it's blocked
+        /// </summary>
+        /// <param name="chat">Inform the chat.</param>
+        /// <returns>Return True or False</returns>
+        public Task<bool> IsBlocked(string chat)
+        {
+            try
+            {
+                return Task.FromResult(js.ExecuteReturnBool(Driver, string.Format("return await WPP.blocklist.isBlocked('{0}')", chat)));
+            }
+            catch (Exception)
+            {
+                return Task.FromResult(false);
+            }
+        }
+        #endregion
     }
 }
