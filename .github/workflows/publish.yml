@@ -1,0 +1,36 @@
+name: Publish
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 3.1.x
+
+      - name: Install dependencies
+        run: dotnet restore
+        working-directory: WPP4DotNet
+
+      - name: Build source
+        run: dotnet build
+        working-directory: WPP4DotNet
+
+      - name: Create the package
+        run: dotnet pack --configuration Release --no-restore
+        working-directory: WPP4DotNet
+
+      - name: Publish the package to nuget.org
+        run: dotnet nuget push bin/Release/*.nupkg -k $NUGET_AUTH_TOKEN -s https://api.nuget.org/v3/index.json
+        working-directory: WPP4DotNet
+        env:
+          NUGET_AUTH_TOKEN: ${{ secrets.NUGET_TOKEN }}

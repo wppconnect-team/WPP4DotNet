@@ -25,5 +25,5 @@ jobs:
         working-directory: WPP4DotNet
 
       - name: Build source
-        run: dotnet build WPP4DotNet.csproj
+        run: dotnet build
         working-directory: WPP4DotNet
