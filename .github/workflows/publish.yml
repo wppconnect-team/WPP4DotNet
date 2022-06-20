@@ -30,7 +30,7 @@ jobs:
         working-directory: WPP4DotNet
 
       - name: Publish the package to nuget.org
-        run: dotnet nuget push bin/Release/*.nupkg -k $NUGET_AUTH_TOKEN -s https://api.nuget.org/v3/index.json
+        run: dotnet nuget push "./bin/Release/*.nupkg" -k $NUGET_AUTH_TOKEN -s https://api.nuget.org/v3/index.json
         working-directory: WPP4DotNet
         env:
           NUGET_AUTH_TOKEN: ${{ secrets.NUGET_TOKEN }}
