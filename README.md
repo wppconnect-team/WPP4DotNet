@@ -12,7 +12,7 @@
 
 ## Install
 
-Quite simple installation use Nuget or command line (**will be published on NuGet soon**)
+Quite simple installation use Nuget or command line:
 ```bash
 Install-Package wpp4dotnet
 ```
@@ -21,14 +21,15 @@ Install-Package wpp4dotnet
 
 ```c#
     private IWpp _wpp;
+    private Thread _thr;
+    
     public void StartService(IWpp wpp, string session = "")
     {
         _wpp = wpp;
         _wpp.StartSession(session, true);
-        thr = new Thread(Service);
-        thr.IsBackground = true;
-        thr.Start();
+        _thr = new Thread(new ThreadStart(Service));
     }
+    
     public async void Service()
     {
       //Implement the services that will run in the background.
@@ -38,13 +39,12 @@ Install-Package wpp4dotnet
 
 ```vb.net
     Private _wpp As IWpp
+    Private _thr As Thread
 
     Public Sub StartService(ByVal wpp As IWpp, ByVal Optional session As String = "")
         _wpp = wpp
         _wpp.StartSession(session, True)
-        thr = New Thread(AddressOf Service)
-        thr.IsBackground = True
-        thr.Start()
+        _thr = New Thread(New ThreadStart(Service))
     End Sub
 
     Public Async Sub Service()

@@ -1,0 +1,29 @@
+name: build
+
+on:
+  push:
+    branches:
+      - "*"
+  pull_request:
+    branches:
+      - "*"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 3.1.x
+
+      - name: Install dependencies
+        run: dotnet restore
+        working-directory: WPP4DotNet
+
+      - name: Build source
+        run: dotnet build
+        working-directory: WPP4DotNet
