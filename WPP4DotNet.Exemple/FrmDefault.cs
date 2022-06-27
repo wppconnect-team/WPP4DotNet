@@ -14,7 +14,8 @@ namespace WPP4DotNet.Exemple
     public partial class FrmDefault : Form
     {
         private IWpp _wpp;
-        private Thread thr;
+        private Thread _thr;
+        private bool qrcode;
 
         public FrmDefault()
         {
@@ -23,22 +24,37 @@ namespace WPP4DotNet.Exemple
 
         private void BtnStart_Click(object sender, EventArgs e)
         {
-            StartService(new ChromeWebApp());
+            qrcode = true;
+            switch (comboBox1.SelectedIndex)
+            {
+                case 0:
+                    StartService(new ChromeWebApp(checkBox3.Checked));
+                    break;
+                case 1:
+                    StartService(new EdgeWebApp(checkBox3.Checked));
+                    break;
+                case 2:
+                    StartService(new FirefoxWebApp(checkBox3.Checked));
+                    break;
+                default:
+                    MessageBox.Show("Please select a browser!");
+                    break;
+            }
         }
 
-        public void StartService(IWpp wpp, string session = "")
+        public void StartService(IWpp wpp)
         {
+            label3.Text = "Waiting!";
+            label3.ForeColor = Color.DodgerBlue;
             _wpp = wpp;
-            _wpp.StartSession(session, checkBox3.Checked);
-            if (string.IsNullOrEmpty(session))
+            _wpp.StartSession();
+            if (qrcode)
             {
                 panel2.Visible = true;
             }
-            label3.Text = "Waiting!";
-            label3.ForeColor = Color.DodgerBlue;
-            thr = new Thread(Service);
-            thr.IsBackground = true;
-            thr.Start();
+            _thr = new Thread(Service);
+            _thr.IsBackground = true;
+            _thr.Start();
         }
 
         public async void Service()
@@ -101,14 +117,14 @@ namespace WPP4DotNet.Exemple
                 var keyword = textBox6.Text.Split(',');
                 foreach (var item in keyword)
                 {
-                    if(item.ToLower().Trim() == msg.Message.ToLower().Trim())
+                    if (item.ToLower().Trim() == msg.Message.ToLower().Trim())
                     {
                         Models.SendReturnModels ret = await _wpp.SendMessage(msg.Sender, message);
-                        Action<Models.SendReturnModels,string> inv2 = SaveSend;
-                        Invoke(inv2, ret,message);
+                        Action<Models.SendReturnModels, string> inv2 = SaveSend;
+                        Invoke(inv2, ret, message);
                     }
                 }
-                
+
             }
 
             //Add incoming messages to ListView
@@ -131,11 +147,16 @@ namespace WPP4DotNet.Exemple
                     //Logout Session
                     _wpp.Logout();
                 }
+
                 //Closed Selenium
                 _wpp.Finish();
 
                 //Google Chrome Kill All Process
-                KillChromeDriverProcesses();
+                if(comboBox1.SelectedIndex == 0)
+                {
+                    KillChromeDriverProcesses();
+                }
+
                 label3.Text = "Disconnected!";
                 label3.ForeColor = Color.Firebrick;
                 panel2.Visible = false;
@@ -178,7 +199,7 @@ namespace WPP4DotNet.Exemple
             }
         }
 
-        private void SaveSend(Models.SendReturnModels ret,string message)
+        private void SaveSend(Models.SendReturnModels ret, string message)
         {
             if (ret.Status)
             {
@@ -212,13 +233,15 @@ namespace WPP4DotNet.Exemple
         {
             var path = Path.Combine(Environment.CurrentDirectory, "Session");
             var name = Guid.NewGuid().ToString("N");
-            StartService(new ChromeWebApp(), Path.Combine(path, name));
+            qrcode = false;
+            StartService(new ChromeWebApp(checkBox3.Checked, Path.Combine(path, name)));
         }
 
         private void button4_Click(object sender, EventArgs e)
         {
             var path = textBox5.Text;
-            StartService(new ChromeWebApp(), path);
+            qrcode = false;
+            StartService(new ChromeWebApp(checkBox3.Checked, path));
         }
 
         private void button2_Click(object sender, EventArgs e)
@@ -241,13 +264,13 @@ namespace WPP4DotNet.Exemple
                     var base64 = ConvertFileToBase64(textBox3.Text);
                     var type = FileType(textBox3.Text);
                     List<string> options = new List<string>();
-                    options.Add(string.Format("type: '{0}'",type));
+                    options.Add(string.Format("type: '{0}'", type));
                     options.Add(string.Format("caption: '{0}'", richTextBox2.Text));
                     Models.SendReturnModels ret = await _wpp.SendFileMessage(textBox2.Text, base64, options);
                     SaveSend(ret, richTextBox1.Text);
-                    //textBox2.Text = "";
-                    //textBox3.Text = "";
-                    //richTextBox2.Text = "";
+                    textBox2.Text = "";
+                    textBox3.Text = "";
+                    richTextBox2.Text = "";
                 }
                 else
                 {
@@ -326,6 +349,11 @@ namespace WPP4DotNet.Exemple
                 default:
                     return "document";
             }
+        }
+
+        private void FrmDefault_Load(object sender, EventArgs e)
+        {
+            comboBox1.SelectedIndex = 0;
         }
     }
 }

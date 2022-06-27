@@ -14,31 +14,31 @@ namespace WPP4DotNet.WebDriver
         /// <summary>
         /// 
         /// </summary>
-        public EdgeWebApp()
+        /// <param name="hidden"></param>
+        /// <param name="path"></param>
+        public EdgeWebApp(bool hidden = true, string path = "")
         {
             new DriverManager().SetUpDriver(new EdgeConfig());
             EdgeOpt = new EdgeOptions();
+            if (!string.IsNullOrEmpty(path))
+            {
+                EdgeOpt.AddAdditionalEdgeOption("cache", path);
+            }
+            if (hidden)
+            {
+                EdgeOpt.AddArguments("--headless");
+            }
         }
 
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="cache"></param>
-        /// <param name="hidden"></param>
-        public override void StartSession(string cache = "", bool hidden = true)
+        public override void StartSession()
         {
             CheckDriverStarted();
             var driverService = EdgeDriverService.CreateDefaultService();
             driverService.HideCommandPromptWindow = true;
-            if (!string.IsNullOrEmpty(cache))
-            {
-                EdgeOpt.AddAdditionalCapability("cache", cache);
-            }
             var drive = new EdgeDriver(driverService, EdgeOpt);
-            if (hidden)
-            {
-                drive.Manage().Window.Position = new System.Drawing.Point(-10000, -10000);
-            }
             base.StartSession(drive);
         }
 
@@ -49,7 +49,7 @@ namespace WPP4DotNet.WebDriver
         public void AddExtensao(string path)
         {
             CheckDriverStarted();
-            EdgeOpt.AddAdditionalCapability("path", path);
+            EdgeOpt.AddAdditionalEdgeOption("path", path);
         }
 
         /// <summary>
@@ -69,7 +69,7 @@ namespace WPP4DotNet.WebDriver
         public void AddArgumentoInicial(params string[] arg)
         {
             CheckDriverStarted();
-            EdgeOpt.AddAdditionalCapability("init", arg);
+            EdgeOpt.AddAdditionalEdgeOption("init", arg);
         }
     }
 }

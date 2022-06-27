@@ -32,6 +32,7 @@
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.BtnStart = new System.Windows.Forms.Button();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.comboBox1 = new System.Windows.Forms.ComboBox();
             this.checkBox3 = new System.Windows.Forms.CheckBox();
             this.BtnLogout = new System.Windows.Forms.Button();
             this.label3 = new System.Windows.Forms.Label();
@@ -146,6 +147,7 @@
             // panel1
             // 
             this.panel1.BackColor = System.Drawing.SystemColors.HighlightText;
+            this.panel1.Controls.Add(this.comboBox1);
             this.panel1.Controls.Add(this.checkBox3);
             this.panel1.Controls.Add(this.BtnLogout);
             this.panel1.Controls.Add(this.label3);
@@ -156,6 +158,19 @@
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(1008, 44);
             this.panel1.TabIndex = 3;
+            // 
+            // comboBox1
+            // 
+            this.comboBox1.FormattingEnabled = true;
+            this.comboBox1.Items.AddRange(new object[] {
+            "Google Chrome",
+            "Microsoft Edge",
+            "Mozilla Firefox"});
+            this.comboBox1.Location = new System.Drawing.Point(455, 10);
+            this.comboBox1.Name = "comboBox1";
+            this.comboBox1.Size = new System.Drawing.Size(121, 23);
+            this.comboBox1.TabIndex = 23;
+            this.comboBox1.Text = "Select a browser";
             // 
             // checkBox3
             // 
@@ -831,6 +846,7 @@
             this.Name = "FrmDefault";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "WPP4DotNet - Exemple";
+            this.Load += new System.EventHandler(this.FrmDefault_Load);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
@@ -924,5 +940,6 @@
         private System.Windows.Forms.Button button4;
         private System.Windows.Forms.Button button3;
         private System.Windows.Forms.CheckBox checkBox3;
+        private System.Windows.Forms.ComboBox comboBox1;
     }
 }

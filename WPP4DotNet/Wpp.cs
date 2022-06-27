@@ -10,8 +10,8 @@ using System.IO;
 using ZXing.QrCode;
 using System.Collections.Generic;
 using System.Net;
-using RestSharp;
 using System.Threading;
+using RestSharp;
 
 namespace WPP4DotNet
 {
@@ -168,7 +168,7 @@ namespace WPP4DotNet
         /// </summary>
         /// <param name="cache">If necessary define the directory to save the session data.</param>
         /// <param name="hidden">Set true or false if you want to hide the browser.</param>
-        public virtual void StartSession(string cache = "", bool hidden = false)
+        public virtual void StartSession()
         {
             CheckDriverStarted();
             DriverStarted = true;
@@ -236,6 +236,7 @@ namespace WPP4DotNet
                 request.AddJsonBody(new { Sender = msg.Sender, Message = msg.Message, Date = msg.Date });
                 RestResponse response = client.PostAsync(request).Result;
                 return response.StatusCode == HttpStatusCode.OK && !string.IsNullOrEmpty(response.Content) ? true : false;
+                return true;
             }
             catch (Exception)
             {

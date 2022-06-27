@@ -1,12 +1,22 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.1</TargetFramework>
+    <TargetFrameworks>net461;net462;netstandard2.1;netcoreapp3.1;net5.0</TargetFrameworks>
+    <Description>WPP4DotNet is an open source project developed by the community through the lib wppconnect-team/wa-js becoming a library compatible with .Net Framework and .Net Core and can be used with C#, F# and VB.NET.</Description>
+    <LangVersion>8.0</LangVersion>
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <GenerateDocumentationFile>False</GenerateDocumentationFile>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <DocumentationFile></DocumentationFile>
-    <ProduceReferenceAssembly>False</ProduceReferenceAssembly>
+    <ProduceReferenceAssembly>True</ProduceReferenceAssembly>
+    <AnalysisLevel>none</AnalysisLevel>
+    <EnableNETAnalyzers>False</EnableNETAnalyzers>
+    <Version>1.0.1</Version>
+    <Company>WPPConnect Team</Company>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net461|AnyCPU'">
+    <Optimize>true</Optimize>
   </PropertyGroup>
 
   <ItemGroup>
@@ -14,8 +24,8 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="Polly" Version="7.2.3" />
     <PackageReference Include="RestSharp" Version="107.3.0" />
-    <PackageReference Include="Selenium.Support" Version="4.1.1" />
-    <PackageReference Include="Selenium.WebDriver" Version="4.1.1" />
+    <PackageReference Include="Selenium.Support" Version="4.3.0" />
+    <PackageReference Include="Selenium.WebDriver" Version="4.3.0" />
     <PackageReference Include="System.Drawing.Common" Version="6.0.0" />
     <PackageReference Include="WebDriverManager" Version="2.13.0" />
     <PackageReference Include="ZXing.Net" Version="0.16.8" />
