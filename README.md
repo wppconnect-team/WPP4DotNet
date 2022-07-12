@@ -20,36 +20,55 @@ Install-Package wpp4dotnet
 ### Start Service (C#)
 
 ```c#
-    private IWpp _wpp;
-    private Thread _thr;
-    
-    public void StartService(IWpp wpp, string session = "")
+    internal class Program
     {
-        _wpp = wpp;
-        _wpp.StartSession(session, true);
-        _thr = new Thread(new ThreadStart(Service));
+        static void Main(string[] args)
+        {
+            Console.WriteLine("Start Service!");
+            Wpp wpp = new Wpp();
+            //Set to True if you want to hide the browser or just remove False.
+            wpp.StartService(new ChromeWebApp(false));
+            new Thread(new ThreadStart(wpp.Service));
+        }
     }
     
-    public async void Service()
+    internal class Wpp
     {
-      //Implement the services that will run in the background.
+        IWpp _wpp;
+        internal void StartService(IWpp wpp)
+        {
+            _wpp = wpp;
+            _wpp.StartSession();
+        }
+        internal async void Service()
+        {
+            //Implement the services that will run in the background.
+        }
     }
 ```
 ### Start Service (VB.NET)
 
 ```vb.net
+Friend Class Program
+    Private Shared Sub Main(ByVal args As String())
+        Console.WriteLine("Start Service!")
+        Dim wpp As Wpp = New Wpp()
+        'Set to True if you want to hide the browser or just remove False.
+        wpp.StartService(New ChromeWebApp(False))
+        New Thread(New ThreadStart(AddressOf wpp.Service))
+    End Sub
+End Class
+
+Friend Class Wpp
     Private _wpp As IWpp
-    Private _thr As Thread
-
-    Public Sub StartService(ByVal wpp As IWpp, ByVal Optional session As String = "")
+    Friend Sub StartService(ByVal wpp As IWpp)
         _wpp = wpp
-        _wpp.StartSession(session, True)
-        _thr = New Thread(New ThreadStart(Service))
+        _wpp.StartSession()
     End Sub
-
-    Public Async Sub Service()
-      'Implement the services that will run in the background.
+    Friend Async Sub Service()
+        'Implement the services that will run in the background.
     End Sub
+End Class
 ```
 ## Maintainers
 Maintainers are needed, I cannot keep with all the updates by myself. If you are interested please open a Pull Request.
