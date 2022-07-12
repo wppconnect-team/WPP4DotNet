@@ -355,5 +355,19 @@ namespace WPP4DotNet.Exemple
         {
             comboBox1.SelectedIndex = 0;
         }
+
+        private async void button5_Click(object sender, EventArgs e)
+        {
+            if(label3.Text == "Connected!")
+            {
+                List<Models.ChatModel> data = await _wpp.ContactList("my");
+                FrmListContact frm = new FrmListContact("my", data);
+                frm.Show();
+            }
+            else
+            {
+                MessageBox.Show("Please connect to whatsapp.");
+            }
+        }
     }
 }

@@ -47,6 +47,7 @@
             this.id_sent = new System.Windows.Forms.ColumnHeader();
             this.label6 = new System.Windows.Forms.Label();
             this.panel5 = new System.Windows.Forms.Panel();
+            this.button5 = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
             this.textBox3 = new System.Windows.Forms.TextBox();
             this.label16 = new System.Windows.Forms.Label();
@@ -308,6 +309,7 @@
             // 
             // panel5
             // 
+            this.panel5.Controls.Add(this.button5);
             this.panel5.Controls.Add(this.button2);
             this.panel5.Controls.Add(this.textBox3);
             this.panel5.Controls.Add(this.label16);
@@ -330,6 +332,16 @@
             this.panel5.Name = "panel5";
             this.panel5.Size = new System.Drawing.Size(354, 460);
             this.panel5.TabIndex = 1;
+            // 
+            // button5
+            // 
+            this.button5.Location = new System.Drawing.Point(225, 13);
+            this.button5.Name = "button5";
+            this.button5.Size = new System.Drawing.Size(121, 23);
+            this.button5.TabIndex = 32;
+            this.button5.Text = "List My Contact";
+            this.button5.UseVisualStyleBackColor = true;
+            this.button5.Click += new System.EventHandler(this.button5_Click);
             // 
             // button2
             // 
@@ -941,5 +953,6 @@
         private System.Windows.Forms.Button button3;
         private System.Windows.Forms.CheckBox checkBox3;
         private System.Windows.Forms.ComboBox comboBox1;
+        private System.Windows.Forms.Button button5;
     }
 }

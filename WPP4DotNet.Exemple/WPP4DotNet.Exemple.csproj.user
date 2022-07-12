@@ -4,5 +4,8 @@
     <Compile Update="FrmDefault.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Update="FrmListContact.cs">
+      <SubType>Form</SubType>
+    </Compile>
   </ItemGroup>
 </Project>
