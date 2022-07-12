@@ -38,6 +38,7 @@ namespace WPP4DotNet.Models
         public bool FromMe { get; set; }
         public bool SimulateTyping { get; set; }
         public string Message { get; set; }
+        public int Ack { get; set; }
         public string Type { get; set; }
         public FileModels File { get; set; }
         public ContactModels Contact { get; set; }

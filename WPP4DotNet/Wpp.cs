@@ -289,6 +289,7 @@ namespace WPP4DotNet
                     using (StreamReader sr = new StreamReader(file))
                     {
                         string wppjs = sr.ReadToEnd();
+                        js.Execute(Driver, "WPPConfig = {poweredBy: 'WPP4DotNet'}");
                         js.Execute(Driver, wppjs);
                         js.Execute(Driver, CustomJS());
                         return true;
@@ -308,11 +309,7 @@ namespace WPP4DotNet
         /// <returns>Returns STRING from JS functions.</returns>
         private string CustomJS()
         {
-            string custom = "";
-            custom += "window.WPP.chatList=async function(d,e){let a=[];switch(d){case\"user\":a=await window.WPP.chat.list({onlyUsers:!0});break;case\"group\":a=await window.WPP.chat.list({onlyGroups:!0});break;case\"label\":a=await window.WPP.chat.list({withLabels:e});break;case\"unread\":a=await window.WPP.chat.list({onlyWithUnreadMessage:!0});break;default:a=await window.WPP.chat.list()}let c=[];for(let b=0;b<a.length;b++)if(a[b]){let f=await WPP.contact.getProfilePictureUrl(a[b].id.user),g={hasUnread:a[b].hasUnread,type:a[b].kind,messages:a[b].msgs._models,lastMessage:a[b].lastReceivedKey,contact:{id:a[b].id.user,server:a[b].id.server,name:a[b].formattedTitle,pushname:a[b].contact.pushname,isUser:a[b].isUser,isGroup:a[b].isGroup,isBroadcast:a[b].isBroadcast,isMe:a[b].contact.isMe,isBusiness:a[b].contact.isBusiness,isMyContact:a[b].contact.isMyContact,isWAContact:a[b].contact.isWAContact,image:f}};c.push(g)}return c}";
-            custom += ",window.WPP.chatFind=async function(b){let a=await window.WPP.chat.find(b),c=await WPP.contact.getProfilePictureUrl(a.id.user),d={hasUnread:a.hasUnread,type:a.kind,messages:a.msgs._models,lastMessage:a.lastReceivedKey,contact:{id:a.id.user,server:a.id.server,name:a.formattedTitle,pushname:a.contact.pushname,isUser:a.isUser,isGroup:a.isGroup,isBroadcast:a.isBroadcast,isMe:a.contact.isMe,isBusiness:a.contact.isBusiness,isMyContact:a.contact.isMyContact,isWAContact:a.contact.isWAContact,image:c}};return d}";
-            custom += ",window.WPP.contactList=async function(d,e){let a=[];switch(d){case\"my\":a=await window.WPP.contact.list({onlyMyContacts:!0});break;case\"label\":a=await window.WPP.contact.list({withLabels:e});break;default:a=await window.WPP.contact.list()}let c=[];for(let b=0;b<a.length;b++)if(a[b]){let f=await WPP.contact.getProfilePictureUrl(a[b].id.user),g={id:a[b].id.user,server:a[b].id.server,name:a[b].name,pushname:a[b].formattedName,isUser:a[b].isUser,isGroup:a[b].isGroup,isBroadcast:a[b].isBroadcast,isMe:a[b].isMe,isBusiness:a[b].isBusiness,isMyContact:a[b].isMyContact,isWAContact:a[b].isWAContact,image:f};c.push(g)}return c}";
-            return custom;
+            return "window.WPP.chatList=async function(s,t){let a=[];switch(s){case\"user\":a=await window.WPP.chat.list({onlyUsers:!0});break;case\"group\":a=await window.WPP.chat.list({onlyGroups:!0});break;case\"label\":a=await window.WPP.chat.list({withLabels:t});break;case\"unread\":a=await window.WPP.chat.list({onlyWithUnreadMessage:!0});break;default:a=await window.WPP.chat.list()}let e=[];for(let s=0;s<a.length;s++)if(a[s]){let t={hasUnread:a[s].hasUnread,type:a[s].kind,messages:a[s].msgs._models,lastMessage:a[s].lastReceivedKey,contact:{id:a[s].id.user,server:a[s].id.server,name:a[s].formattedTitle,pushname:a[s].contact.pushname,isUser:a[s].isUser,isGroup:a[s].isGroup,isBroadcast:a[s].isBroadcast,isMe:a[s].contact.isMe,isBusiness:a[s].contact.isBusiness,isMyContact:a[s].contact.isMyContact,isWAContact:a[s].contact.isWAContact,image:\"\"}};e.push(t)}return e},window.WPP.chatFind=async function(s){let t=await window.WPP.chat.find(s);return{hasUnread:t.hasUnread,type:t.kind,messages:t.msgs._models,lastMessage:t.lastReceivedKey,contact:{id:t.id.user,server:t.id.server,name:t.formattedTitle,pushname:t.contact.pushname,isUser:t.isUser,isGroup:t.isGroup,isBroadcast:t.isBroadcast,isMe:t.contact.isMe,isBusiness:t.contact.isBusiness,isMyContact:t.contact.isMyContact,isWAContact:t.contact.isWAContact,image:\"\"}}},window.WPP.contactList=async function(s,t){let a=[];switch(s){case\"my\":a=await window.WPP.contact.list({onlyMyContacts:!0});break;case\"label\":a=await window.WPP.contact.list({withLabels:t});break;default:a=await window.WPP.contact.list()}let e=[];for(let s=0;s<a.length;s++)if(a[s]){let t={id:a[s].id.user,server:a[s].id.server,name:a[s].name,pushname:a[s].formattedName,isUser:a[s].isUser,isGroup:a[s].isGroup,isBroadcast:a[s].isBroadcast,isMe:a[s].isMe,isBusiness:a[s].isBusiness,isMyContact:a[s].isMyContact,isWAContact:a[s].isWAContact,image:\"\"};e.push(t)}return e};";
         }
         #endregion
 
@@ -732,6 +729,7 @@ namespace WPP4DotNet
                         {
                             Models.MessageModels message = new Models.MessageModels();
                             message.Id = item["id"]["_serialized"];
+                            message.Ack = (int)item["ack"];
                             message.FromMe = item["id"]["fromMe"];
                             message.Message = func.IsSet(item, "body") ? item["body"] : "";
                             message.Type = item["type"];
@@ -752,6 +750,52 @@ namespace WPP4DotNet
             catch (Exception)
             {
                 return Task.FromResult(new List<Models.ChatModel>());
+            }
+        }
+
+        /// <summary>
+        /// This method searches all chats and can be filtered by user, group, unread and label.
+        /// </summary>
+        /// <param name="filter">Use "user", "group", "unread" or "label" to filter or leave blank to bring everything.</param>
+        /// <param name="value">Enter an array of strings to filter the desired label.</param>
+        /// <returns>Returns the object raw</returns>
+        public Task<IReadOnlyCollection<object>> ChatListRaw(string filter = "", List<string> value = null)
+        {
+            try
+            {
+                var label = "";
+                if (value != null && filter == "label")
+                {
+                    foreach (var item in value)
+                    {
+                        label += string.Format(",'{0}'", item);
+                    }
+                    label = string.Format(",[{0}]", label.TrimStart(','));
+                }
+                IReadOnlyCollection<object> obj;
+                switch (filter)
+                {
+                    case "user":
+                        obj = js.ExecuteReturnListObj(Driver, "return await WPP.chat.list({onlyUsers:true})");
+                        break;
+                    case "group":
+                        obj = js.ExecuteReturnListObj(Driver, "return await WPP.chat.list({onlyGroups:true})");
+                        break;
+                    case "unread":
+                        obj = js.ExecuteReturnListObj(Driver, "return await WPP.chat.list({onlyWithUnreadMessage:true})");
+                        break;
+                    case "label":
+                        obj = js.ExecuteReturnListObj(Driver, "return await ({withLabels: " + label + "})");
+                        break;
+                    default:
+                        obj = js.ExecuteReturnListObj(Driver, "return await WPP.chat.list()");
+                        break;
+                }
+                return Task.FromResult(obj);
+            }
+            catch (Exception)
+            {
+                return null;
             }
         }
 
@@ -791,6 +835,7 @@ namespace WPP4DotNet
                     {
                         Models.MessageModels message = new Models.MessageModels();
                         message.Id = item["id"]["_serialized"];
+                        message.Ack = (int)item["ack"];
                         message.FromMe = item["id"]["fromMe"];
                         message.Message = func.IsSet(item, "body") ? item["body"] : "";
                         message.Type = item["type"];
@@ -809,6 +854,25 @@ namespace WPP4DotNet
             catch (Exception)
             {
                 return Task.FromResult(new Models.ChatModel());
+            }
+        }
+
+        /// <summary>
+        /// This method find a chat by id.
+        /// </summary>
+        /// <param name="chat">Inform the chat.</param>
+        /// <returns>Returns the object raw</returns>
+        public Task<object> ChatFindRaw(string chat)
+        {
+            try
+            {
+                Models.ChatModel chatModel = new Models.ChatModel();
+                object response = js.ExecuteReturnObj(Driver, string.Format("return await WPP.chat.find('{0}')", chat));
+                return Task.FromResult(response);
+            }
+            catch (Exception)
+            {
+                return Task.FromResult(new object());
             }
         }
 
@@ -1513,6 +1577,7 @@ namespace WPP4DotNet
                 {
                     Functions func = new Functions();
                     msg.Id = response["id"]["_serialized"];
+                    msg.Ack = (int)response["ack"];
                     msg.FromMe = response["id"]["fromMe"];
                     msg.Message = func.IsSet(response, "body") ? response["body"] : "";
                     msg.Type = response["type"];
@@ -1552,6 +1617,7 @@ namespace WPP4DotNet
                     {
                         Models.MessageModels msg = new Models.MessageModels();
                         msg.Id = item["id"]["_serialized"];
+                        msg.Ack = (int)item["ack"];
                         msg.FromMe = item["id"]["fromMe"];
                         msg.Message = func.IsSet(item, "body") ? item["body"] : "";
                         msg.Type = item["type"];
@@ -1681,6 +1747,46 @@ namespace WPP4DotNet
             catch (Exception)
             {
                 return Task.FromResult(new List<Models.ChatModel>());
+            }
+        }
+
+        /// <summary>
+        /// This method searches all contacts and can be filtered by my and label.
+        /// </summary>
+        /// <param name="filter">Use "my" or "label" to filter or leave blank to bring everything.</param>
+        /// <param name="value">Enter an array of strings to filter the desired label.</param>
+        /// <returns>Returns the List object raw</returns>
+        public Task<IReadOnlyCollection<object>> ContactListRaw(string filter = "", List<string> value = null)
+        {
+            try
+            {
+                var label = "";
+                if (value != null && filter == "label")
+                {
+                    foreach (var item in value)
+                    {
+                        label += string.Format(",'{0}'", item);
+                    }
+                    label = string.Format(",[{0}]", label.TrimStart(','));
+                }
+                IReadOnlyCollection<object> obj;
+                switch (filter)
+                {
+                    case "my":
+                        obj = js.ExecuteReturnListObj(Driver, "return await WPP.contact.list({onlyMyContacts:true})");
+                        break;
+                    case "label":
+                        obj = js.ExecuteReturnListObj(Driver, "return await WPP.contact.list({withLabels: " + label + "})");
+                        break;
+                    default:
+                        obj = js.ExecuteReturnListObj(Driver, "return await WPP.contact.list()");
+                        break;
+                }
+                return Task.FromResult(obj);
+            }
+            catch (Exception)
+            {
+                return null;
             }
         }
         #endregion
@@ -2047,6 +2153,7 @@ namespace WPP4DotNet
                     {
                         Models.MessageModels message = new Models.MessageModels();
                         message.Id = item["id"]["_serialized"];
+                        message.Ack = (int)item["ack"];
                         message.FromMe = item["id"]["fromMe"];
                         message.Message = func.IsSet(item, "body") ? item["body"] : "";
                         message.Type = item["type"];
@@ -2209,6 +2316,26 @@ namespace WPP4DotNet
                 return false;
             }
         }
+
+        /// <summary>
+        /// This method Set Group image.
+        /// </summary>
+        /// <param name="chat"></param>
+        /// <param name="image"></param>
+        /// <returns></returns>
+        public Task<bool> GroupSetIcon(string chat, string image)
+        {
+            try
+            {
+                var str = string.Format("return await WPP.group.setIcon('{0}','{1}')", chat, image);
+                dynamic response = js.ExecuteReturnObj(Driver, str);
+                return Task.FromResult(true);
+            }
+            catch (Exception)
+            {
+                return Task.FromResult(false); 
+            }
+        }
         #endregion
 
         #region WPPJS LABELS - Functions
@@ -2237,6 +2364,7 @@ namespace WPP4DotNet
                     {
                         Models.MessageModels message = new Models.MessageModels();
                         message.Id = item["id"]["_serialized"];
+                        message.Ack = (int)response["ack"];
                         message.FromMe = item["id"]["fromMe"];
                         message.Message = func.IsSet(item, "body") ? item["body"] : "";
                         message.Type = item["type"];
@@ -2250,6 +2378,32 @@ namespace WPP4DotNet
             catch (Exception)
             {
                 return Task.FromResult(new List<Models.MessageModels>());
+            }
+        }
+
+        /// <summary>
+        /// This method set the status in text.
+        /// </summary>
+        /// <param name="content"></param>
+        /// <param name="options"></param>
+        /// <returns></returns>
+        public Task<bool> SendTextStatus(string content, List<string> options)
+        {
+            try
+            {
+                var option = "";
+                foreach (var item in options)
+                {
+                    option += string.Format(",{0}", item);
+                }
+                option = "{" + option.TrimStart(',') + "}";
+                var str = string.Format("return await WPP.status.sendTextStatus('{0}',{1})",content, option);
+                dynamic response = js.ExecuteReturnObj(Driver, str);
+                return Task.FromResult(true);
+            }
+            catch (Exception)
+            {
+                return Task.FromResult(false);
             }
         }
         #endregion
